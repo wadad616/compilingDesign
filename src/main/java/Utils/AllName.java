@@ -46,7 +46,7 @@ public class AllName {
         IfK, WhileK, AssignK, ReadK, WriteK, CallK, ReturnK,
         //特殊stmt类型 这些stmtK 后可以接上多个普通的stmt类型，就和StmLK差不多了
         ThenK,ElseK,DoK,
-        //exp类型
+        //exp类型  IdK既可以dec类型，也可以为exp类型 或者将IdK看作式变量也可以
         OpK, ConstK,
 
     }

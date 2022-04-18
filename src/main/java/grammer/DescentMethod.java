@@ -16,6 +16,8 @@ import static Utils.AllName.NodeKind.*;
 //注意在varimore中设置一下exp的attr
 //调用语句的儿子为Exp ，名字是一个exp 算了
 //我觉得不能这样  调用语句有标识符，不同于一般赋值语句 左式的标识符也是表达式
+
+//找一下警告中的used 判断一下程序中的错误
 public class DescentMethod {
     //表示的token序列
     List<LexToken> tokenList;
@@ -1057,6 +1059,8 @@ public class DescentMethod {
         treeNode.lineno = t.lineno;
         treeNode.boolName();
         treeNode.name.add(tempName);
+        //像这种只可以为标识符类型
+        treeNode.memberKind = AllName.memberKind.IdK;
         t.idNum++;
         //当前无法判断ExpAttr的内容所以先不进行相关设置
         t.boolChild();
@@ -1068,7 +1072,7 @@ public class DescentMethod {
         }
 
         //对于变量表达式相关的处理
-        varIdMore(treeNode);
+        variMore(treeNode);
         //错误处理
 
         if (!match("ASSIGN")) {
@@ -1335,13 +1339,15 @@ public class DescentMethod {
 
     /**
      * @param t: 此参数传入的是StmtK节点, 在stm()处创建
-     * @Description 仔细思考觉得没有问题，相当于给表达式限定条件 不需要next
+     * @Description 仔细思考觉得没有问题，相当于给表达式限定条件 需要next 需要line
+     * 这个函数有多种作用 ！！！！
      * RelExp ::= Exp OtherRelE     ["INTC","LPAREN","ID"]
      * OtherRelE ::= CmpOp Exp      ["LT","EQ"]
      * TODO 错误检查 test
      * @Date 2022/4/18 15:58
      **/
-    void exp(TreeNode t) {
+    TreeNode exp(TreeNode t) {
+        TreeNode ret;
         if (!match(new String[]{"INTC", "LPAREN", "ID"})) {
             //错误处理
         }
@@ -1351,77 +1357,350 @@ public class DescentMethod {
         //3.得到bool表达式的左式
         TreeNode t1 = simpleExp();
         //错误处理
+        ret = t1;
 
         if (match(new String[]{"LT", "EQ"})) {
             TreeNode treeNode = new TreeNode();
             treeNode.nodeKind = ExpK;
-            treeNode.memberKind= AllName.memberKind.OpK;
+            treeNode.memberKind = AllName.memberKind.OpK;
             treeNode.lineno = getCurrentToken().getLineShow();
             treeNode.setAttr("exp");
             //赋予OP恰当的值
-            treeNode.attr.expAttr.op=getCurrentToken().getType();
+            treeNode.attr.expAttr.op = getCurrentToken().getType();
             //表示此表达式值为bool类型
-            treeNode.attr.expAttr.type= AllName.LexType.Boolean;
+            treeNode.attr.expAttr.type = AllName.LexType.Boolean;
             //建立父子树关系
-            treeNode.father=t;
-            t.boolChild();
-            t.child.add(treeNode);
 
+            //只有最开始的表达式需要这样
+            if (t != null) {
+                treeNode.father = t;
+                t.boolChild();
+                t.child.add(treeNode);
+            }
             //建立父子树关系
             treeNode.boolChild();
             treeNode.child.add(t1);
-            t1.father=treeNode;
+            t1.father = treeNode;
 
             next();
 
             //得到bool表达式的右式
+            if (!match(new String[]{"INTC", "LPAREN", "ID"})) {
+                //错误处理
+            }
             TreeNode t2 = simpleExp();
+            //错误处理
+
             treeNode.child.add(t1);
-            t1.father=treeNode;
+            t1.father = treeNode;
+            ret = treeNode;
         }
-
+        return ret;
     }
 
+    /**
+     * @return: grammer.TreeNode 放回值在exp()使用
+     * @Description 需要next 需要line
+     * Exp ::= Term OtherTerm       ["INTC","LPAREN","ID"]
+     * OtherTerm ::= $              ["COMMA","FI","SEMI","LT","RMIDPAREN","ELSE","END","THEN","RPAREN","DO","ENDWH","EQ"]
+     * OtherTerm ::= AddOp Exp      ["PLUS","MINUS"]
+     * TODO 错误检查 测试
+     * @Date 2022/4/18 16:25
+     **/
     TreeNode simpleExp() {
-        return null;
+        TreeNode ret;
+        TreeNode left;
+        if (!match(new String[]{"INTC", "LPAREN", "ID"})) {
+            //错误处理
+        }
+        TreeNode t1 = term();
+        //错误处理
+        ret = t1;
+
+        left = t1;
+        //操 突然发现这个地方需要写一个循环
+        while (match(new String[]{"PLUS", "MINUS"})) {
+            TreeNode treeNode = new TreeNode();
+            treeNode.nodeKind = ExpK;
+            treeNode.memberKind = AllName.memberKind.OpK;
+            treeNode.lineno = getCurrentToken().getLineShow();
+            treeNode.setAttr("exp");
+            //赋予OP恰当的值
+            treeNode.attr.expAttr.op = getCurrentToken().getType();
+            //表示此表达式值为bool类型
+            treeNode.attr.expAttr.type = AllName.LexType.Integer;
+
+            //建立父子树关系
+            treeNode.boolChild();
+            treeNode.child.add(left);
+            left.father = treeNode;
+
+            next();
+
+            //得到bool表达式的右式
+            if (!match(new String[]{"INTC", "LPAREN", "ID"})) {
+                //错误处理
+            }
+            TreeNode t2 = term();
+            //错误处理
+
+            treeNode.child.add(t2);
+            t2.father = treeNode;
+            ret = treeNode;
+            left = treeNode;
+        }
+        return ret;
     }
 
-    void term(TreeNode t) {
+    /**
+     * @return: grammer.TreeNode 返回值在simpleExp()使用
+     * @Description 需要next 需要line
+     * Term ::= Factor OtherFactor      ["INTC","LPAREN","ID"]
+     * OtherFactor ::= $                ["COMMA","FI","SEMI","LT","RMIDPAREN","RPAREN","DO","EQ","MINUS","ELSE","END","THEN","ENDWH","PLUS"]
+     * OtherFactor ::= MultOp Term      ["OVER","TIMES"]
+     * TODO
+     * @Date 2022/4/18 16:36
+     **/
+    TreeNode term() {
+        TreeNode ret;
+        TreeNode left;
+        if (!match(new String[]{"INTC", "LPAREN", "ID"})) {
+            //错误处理
+        }
+        TreeNode t1 = factor();
+        //错误处理
+        ret = t1;
 
+        left = t1;
+
+        while (match(new String[]{"OVER", "TIMES"})) {
+            TreeNode treeNode = new TreeNode();
+            treeNode.nodeKind = ExpK;
+            treeNode.memberKind = AllName.memberKind.OpK;
+            treeNode.lineno = getCurrentToken().getLineShow();
+            treeNode.setAttr("exp");
+            //赋予OP恰当的值
+            treeNode.attr.expAttr.op = getCurrentToken().getType();
+            //表示此表达式值为Integer
+            treeNode.attr.expAttr.type = AllName.LexType.Integer;
+
+            //建立父子树关系
+            treeNode.boolChild();
+            treeNode.child.add(left);
+            left.father = treeNode;
+
+            next();
+
+            //得到bool表达式的右式
+            if (!match(new String[]{"INTC", "LPAREN", "ID"})) {
+                //错误处理
+            }
+            TreeNode t2 = factor();
+            //错误处理
+
+            treeNode.child.add(t2);
+            t2.father = treeNode;
+            ret = treeNode;
+            left = treeNode;
+        }
+        return ret;
     }
 
-    void factor(TreeNode t) {
+    /**
+     * @return: grammer.TreeNode 在term()使用
+     * @Description 需要next 需要行
+     * Factor ::= ( Exp )       ["LPAREN"]
+     * Factor ::= INTC          ["INTC"]
+     * Factor ::= Variable      ["ID"]
+     * TODO 错误检查 test
+     * @Date 2022/4/18 17:55
+     **/
+    TreeNode factor() {
+        TreeNode ret = null;
+        if (match("LPAREN")) {
+            next();
+            ret = exp(null);
+            //错误处理
+            if (!match("RPAREN")) {
+                //错误处理
+            }
+            next();
+        } else if (match("INTC")) {
+            TreeNode treeNode = new TreeNode();
+            treeNode.nodeKind = ExpK;
+            treeNode.memberKind = AllName.memberKind.ConstK;
+            treeNode.lineno = getCurrentToken().getLineShow();
+            treeNode.setAttr("exp");
 
+            //标识符相关的处理
+            treeNode.boolName();
+            String sem = getCurrentToken().getSem();
+            treeNode.name.add(sem);
+            treeNode.idNum++;
+            int val = 0;
+            try {
+                val = Integer.parseInt(sem);
+            } catch (Exception e) {
+                //错误处理
+            }
+            //表示此表达式值为Integer
+            treeNode.attr.expAttr.type = AllName.LexType.Integer;
+            treeNode.attr.expAttr.val = val;
+            ret = treeNode;
+            next();
+        } else if (match("ID")) {
+            ret = variable();
+            //错误处理
+        }
+        return ret;
     }
 
-    void variable(TreeNode t) {
+    /**
+     * @return: grammer.TreeNode  在factor()处使用
+     * @Description 需要next 需要行 创建新的节点
+     * Variable ::= ID VariMore        ["ID"]
+     * TODO 错误检查 test
+     * @Date 2022/4/18 19:04
+     **/
+    TreeNode variable() {
+        if (!match("ID")) {
+            //错误处理
+        }
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = ExpK;
+        treeNode.memberKind = AllName.memberKind.IdK;
+        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode.setAttr("exp");
 
+        //标识符相关的处理
+        treeNode.boolName();
+        String sem = getCurrentToken().getSem();
+        treeNode.name.add(sem);
+        treeNode.idNum++;
+
+        next();
+        variMore(treeNode);
+        //错误处理
+        return treeNode;
     }
 
+    /**
+     * @param t: 表达式类型ExpK  具体类型IdK  来自variable() assignmentRest()
+     * @Description 仔细思考一下应该所有的 ID 都落在这里了
+     * 可能需要next 不需要行
+     * VariMore ::= $               ["COMMA","FI","TIMES","SEMI","LT","RMIDPAREN","RPAREN","DO","ASSIGN","EQ","MINUS","OVER","ELSE","END","THEN","ENDWH","PLUS"]
+     * VariMore ::= [ Exp ]         ["LMIDPAREN"]
+     * VariMore ::= . FieldVar      ["DOT"]
+     * TODO 错误检查 test
+     * @Date 2022/4/18 19:23
+     **/
     void variMore(TreeNode t) {
-        if (match(new String[]{"SEMI", "RPAREN"})) {
+        //注意在这种情况下就不知道类型了,需要在语义分析的时候才可以进一步的确定
+        if (match(new String[]{"COMMA", "FI", "TIMES", "SEMI", "LT", "RMIDPAREN", "RPAREN", "DO", "ASSIGN", "EQ", "MINUS", "OVER", "ELSE", "END", "THEN", "ENDWH", "PLUS"})) {
+            if (t.attr != null) {
+                t.setAttr("exp");
+            }
+            t.attr.expAttr.varKind = AllName.LexType.idV;
             return;
-        } else if (match("COMMA")) {
+        } else if (match("LMIDPAREN")) {
             next();
-            formList(t);
+            //特殊用法
+            //注意这种情况可以确定t的
+            if (t.attr != null) {
+                t.setAttr("exp");
+            }
+            t.attr.expAttr.varKind = AllName.LexType.ArrayMembV;
+            TreeNode treeNode = exp(null);
             //错误处理
+
+            t.boolChild();
+            //注意数组Id表达式的第一儿子就是下标
+            t.child.add(treeNode);
+            treeNode.father = t;
+            if (!match("RMIDPAREN")) {
+                //错误处理
+            }
+        } else if (match("DOT")) {
+            next();
+            if (t.attr != null) {
+                t.setAttr("exp");
+            }
+            t.attr.expAttr.varKind = AllName.LexType.FieldMembV;
+            TreeNode treeNode = fieldVar();
+            //错误处理
+
+            t.boolChild();
+            //注意数组Id表达式的第一儿子就是下标
+            t.child.add(treeNode);
+            treeNode.father = t;
         }
         //错误处理
+        System.out.println("错误");
     }
 
+    /**
+     * @return: grammer.TreeNode 在variMore()处使用
+     * @Description 需要next 需要line
+     * FieldVar ::= ID FieldVarMore    ["ID"]
+     * TODO 错误检查 test
+     * @Date 2022/4/18 19:52
+     **/
     TreeNode fieldVar() {
-        return null;
-    }
-
-    void fieldVarMore(TreeNode t) {
-        if (match(new String[]{"SEMI", "RPAREN"})) {
-            return;
-        } else if (match("COMMA")) {
-            next();
-            formList(t);
+        if (!match("ID")) {
             //错误处理
         }
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = ExpK;
+        treeNode.memberKind = AllName.memberKind.IdK;
+        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode.setAttr("exp");
+
+        //标识符相关的处理
+        treeNode.boolName();
+        String sem = getCurrentToken().getSem();
+        treeNode.name.add(sem);
+        treeNode.idNum++;
+
+        next();
+        fieldVarMore(treeNode);
         //错误处理
+        return treeNode;
+    }
+
+    /**
+     * @param t: 来自fieldVar()
+     * @Description 需要next 需要line
+     * FieldVarMore ::= $           ["COMMA","FI","TIMES","SEMI","LT","RMIDPAREN","RPAREN","DO","ASSIGN","EQ","MINUS","OVER","ELSE","END","THEN","ENDWH","PLUS"]
+     * FieldVarMore ::= [ Exp ]     ["LMIDPAREN"]
+     * TODO 错误检查 test
+     * @Date 2022/4/18 20:02
+     **/
+    void fieldVarMore(TreeNode t) {
+        if (match(new String[]{"COMMA", "FI", "TIMES", "SEMI", "LT", "RMIDPAREN", "RPAREN", "DO", "ASSIGN", "EQ", "MINUS", "OVER", "ELSE", "END", "THEN", "ENDWH", "PLUS"})) {
+            if (t.attr != null) {
+                t.setAttr("exp");
+            }
+            t.attr.expAttr.varKind = AllName.LexType.idV;
+            return;
+        } else if (match("LMIDPAREN")) {
+            next();
+            //特殊用法
+            //注意这种情况可以确定t的
+            if (t.attr != null) {
+                t.setAttr("exp");
+            }
+            t.attr.expAttr.varKind = AllName.LexType.ArrayMembV;
+            TreeNode treeNode = exp(null);
+            //错误处理
+
+            t.boolChild();
+            //注意数组Id表达式的第一儿子就是下标
+            t.child.add(treeNode);
+            treeNode.father = t;
+            if (!match("RMIDPAREN")) {
+                //错误处理
+            }
+        }
     }
 
     TreeNode parse() {
