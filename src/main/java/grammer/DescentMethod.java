@@ -1321,7 +1321,7 @@ public class DescentMethod {
      * ActParamMore ::= , ActParamList      ["COMMA"]
      * TODO
      * @Date 2022/4/18 13:43
-    **/
+     **/
     void actParamMore(TreeNode t) {
         if (match(new String[]{"RPAREN"})) {
             return;
@@ -1333,23 +1333,69 @@ public class DescentMethod {
         //错误处理
     }
 
+    /**
+     * @param t: 此参数传入的是StmtK节点, 在stm()处创建
+     * @Description 仔细思考觉得没有问题，相当于给表达式限定条件 不需要next
+     * RelExp ::= Exp OtherRelE     ["INTC","LPAREN","ID"]
+     * OtherRelE ::= CmpOp Exp      ["LT","EQ"]
+     * TODO 错误检查 test
+     * @Date 2022/4/18 15:58
+     **/
     void exp(TreeNode t) {
+        if (!match(new String[]{"INTC", "LPAREN", "ID"})) {
+            //错误处理
+        }
+
+        //1.先默认只有一个expression，先假设一个exp只可以生成一个节点，只不过这个节点为套接的
+        //2.这么理解只有赋值才是有多个表达式的
+        //3.得到bool表达式的左式
+        TreeNode t1 = simpleExp();
+        //错误处理
+
+        if (match(new String[]{"LT", "EQ"})) {
+            TreeNode treeNode = new TreeNode();
+            treeNode.nodeKind = ExpK;
+            treeNode.memberKind= AllName.memberKind.OpK;
+            treeNode.lineno = getCurrentToken().getLineShow();
+            treeNode.setAttr("exp");
+            //赋予OP恰当的值
+            treeNode.attr.expAttr.op=getCurrentToken().getType();
+            //表示此表达式值为bool类型
+            treeNode.attr.expAttr.type= AllName.LexType.Boolean;
+            //建立父子树关系
+            treeNode.father=t;
+            t.boolChild();
+            t.child.add(treeNode);
+
+            //建立父子树关系
+            treeNode.boolChild();
+            treeNode.child.add(t1);
+            t1.father=treeNode;
+
+            next();
+
+            //得到bool表达式的右式
+            TreeNode t2 = simpleExp();
+            treeNode.child.add(t1);
+            t1.father=treeNode;
+        }
+
     }
 
-    TreeNode simple_exp() {
+    TreeNode simpleExp() {
         return null;
     }
 
-    TreeNode term() {
-        return null;
+    void term(TreeNode t) {
+
     }
 
-    TreeNode factor() {
-        return null;
+    void factor(TreeNode t) {
+
     }
 
-    TreeNode variable() {
-        return null;
+    void variable(TreeNode t) {
+
     }
 
     void variMore(TreeNode t) {
