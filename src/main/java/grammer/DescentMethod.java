@@ -12,6 +12,10 @@ import static Utils.AllName.NodeKind.*;
 //记住只在进行真实匹配的时候进行next
 //记录类型节点输出的时候看一下父亲节点
 //每当遇到一个next() 一个函数注意此函数是否需要去设置所在行
+//exp处理的时候注意一下来源
+//注意在varimore中设置一下exp的attr
+//调用语句的儿子为Exp ，名字是一个exp 算了
+//我觉得不能这样  调用语句有标识符，不同于一般赋值语句 左式的标识符也是表达式
 public class DescentMethod {
     //表示的token序列
     List<LexToken> tokenList;
@@ -1050,7 +1054,7 @@ public class DescentMethod {
         t.memberKind = AllName.memberKind.AssignK;
         TreeNode treeNode = new TreeNode();
         treeNode.nodeKind = ExpK;
-        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode.lineno = t.lineno;
         treeNode.boolName();
         treeNode.name.add(tempName);
         t.idNum++;
@@ -1238,7 +1242,6 @@ public class DescentMethod {
 
         exp(t);
         //错误处理
-
         treeNode.name.add(getCurrentToken().getSem());
         treeNode.idNum++;
         next();
@@ -1247,24 +1250,84 @@ public class DescentMethod {
         }
     }
 
+    /**
+     * @param t: 此参数传入的是StmLK或者特殊StmtK节点, 在programBody()或者conditionalStm()或者loopStm()处创建
+     * @Description 需要next 和设置line
+     * 需要注意此处进行了适当的修改， 因为通过前面的语法可以得到没有返回值这一回事
+     * ReturnStm ::= RETURN    ["RETURN"]
+     * TODO 错误检查 test
+     * @Date 2022/4/18 12:29
+     **/
     void returnStm(TreeNode t) {
-
+        if (!match("RETURN")) {
+            //错误处理
+        }
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = StmtK;
+        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode.memberKind = AllName.memberKind.ReturnK;
+        t.boolChild();
+        t.child.add(treeNode);
+        treeNode.father = t;
+        //返回值
+        next();
     }
 
+    /**
+     * @param t: 此参数传入的是StmtK节点, 在stm()处创建
+     * @Description 需要next 需要line 注意调用语句的表达式为它各个实参
+     * CallStmRest ::= ( ActParamList )     ["LPAREN"]
+     * TODO
+     * @Date 2022/4/18 13:12
+     **/
     void callStmRest(TreeNode t) {
-
+        if (!match("LPAREN")) {
+            //错误处理
+        }
+        t.memberKind = AllName.memberKind.CallK;
+        t.boolName();
+        t.name.add(tempName);
+        next();
+        actParamList(t);
+        //错误处理
+        if (!match("RPAREN")) {
+            //错误处理
+        }
     }
 
+    /**
+     * @param t: 此参数传入的是StmtK节点, 在stm()处创建
+     * @Description 不需要进行next
+     * ActParamList ::= $                   ["RPAREN"]
+     * ActParamList ::= Exp ActParamMore    ["INTC","LPAREN","ID"]
+     * TODO
+     * @Date 2022/4/18 13:37
+     **/
     void actParamList(TreeNode t) {
-
+        if (match("RPAREN")) {
+            return;
+        } else if (match(new String[]{"INTC", "LPAREN", "ID"})) {
+            exp(t);
+            actParamMore(t);
+            //错误处理
+        }
+        //错误处理
     }
 
+    /**
+     * @param t: 此参数传入的是StmtK节点, 在stm()处创建
+     * @Description 需要next 不需要设置行
+     * ActParamMore ::= $                   ["RPAREN"]
+     * ActParamMore ::= , ActParamList      ["COMMA"]
+     * TODO
+     * @Date 2022/4/18 13:43
+    **/
     void actParamMore(TreeNode t) {
-        if (match(new String[]{"SEMI", "RPAREN"})) {
+        if (match(new String[]{"RPAREN"})) {
             return;
         } else if (match("COMMA")) {
             next();
-            formList(t);
+            actParamList(t);
             //错误处理
         }
         //错误处理

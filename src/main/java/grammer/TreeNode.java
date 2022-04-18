@@ -31,6 +31,11 @@ public class TreeNode {
     //记录语法树节点的其他属性
     Attr attr;
 
+    public TreeNode() {
+        nodeKind = AllName.NodeKind.NodeKindDefault;
+        memberKind = AllName.memberKind.memberKindDefault;
+    }
+
     public Attr getAttr() {
         return attr;
     }
@@ -63,9 +68,10 @@ public class TreeNode {
             this.child = new ArrayList<>();
         }
     }
-    public void boolName(){
-        if(this.name==null){
-            this.name=new ArrayList<>();
+
+    public void boolName() {
+        if (this.name == null) {
+            this.name = new ArrayList<>();
         }
     }
 
@@ -74,10 +80,18 @@ public class TreeNode {
         public int up;
         //注意东西是用于声明阶段的,所以应该使用声明阶段的枚举类型
         public AllName.memberKind childType;
+
+        public ArrayAttr() {
+            childType = AllName.memberKind.memberKindDefault;
+        }
     }
 
     public class procAttr {
         public AllName.LexType paramType;
+
+        public procAttr() {
+            paramType = AllName.LexType.LexTypeDefault;
+        }
     }
 
     public class ExpAttr {
@@ -85,6 +99,12 @@ public class TreeNode {
         public int val;
         public AllName.LexType varKind;
         public AllName.LexType type;
+
+        public ExpAttr() {
+            op = AllName.LexType.LexTypeDefault;
+            varKind = AllName.LexType.LexTypeDefault;
+            type = AllName.LexType.LexTypeDefault;
+        }
     }
 
 }

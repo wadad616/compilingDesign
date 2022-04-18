@@ -5,6 +5,8 @@ import java.util.Map;
 
 public class AllName {
     public static enum LexType {
+        //默认值
+        LexTypeDefault,
         /*簿记单词符号*/
         EOF, ERROR,
         /*保留字*/
@@ -27,11 +29,15 @@ public class AllName {
 
     //语法树的节点类型    待补充
     public static enum NodeKind {
+        //默认值
+        NodeKindDefault,
         ProK, PheadK, TypeK, VarK, ProcDecK, StmLK, DecK, StmtK, ExpK, TotalDecK
     }
 
     //语法树的节点的具体类型
     public static enum memberKind {
+        //默认值
+        memberKindDefault,
         //dec类型
         ArrayK, CharK, IntegerK, RecordK,
         //IdK既可以dec类型，也可以为exp类型
