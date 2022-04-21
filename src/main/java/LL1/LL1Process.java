@@ -16,6 +16,7 @@ import static Utils.AllName.NodeKind.*;
 //结果为$ 的地方需要改进.第一改进一下那个压栈函数
 // 第二改一下有些出栈的过程需要进行修改，父节点不一定需要进行弹出
 //往回看一下有进行树间关系连接的时候，父亲是否是父亲
+//TODO 一个more可能有多个地方会使用到，看看前面有没有使用到
 public class LL1Process {
     //表示的token序列
     List<LexToken> tokenList;
@@ -732,38 +733,64 @@ public class LL1Process {
         treeNode.attr.procAttr.paramType = AllName.LexType.VarParaType;
     }
 
+    //FormList ::= ID FidMore      ["ID"]
     void process52() {
         pushSymbol(52);
+        TreeNode peek = nodeStack.peek();
+        peek.boolName();
+        peek.name.add(getCurrentToken().getSem());
+        peek.idNum++;
     }
 
+    //FidMore ::= $                ["SEMI","RPAREN"]
     void process53() {
         pushSymbol(53);
     }
 
+    //FidMore ::= , FormList       ["COMMA"]
     void process54() {
         pushSymbol(54);
     }
 
+    //ProcDecPart ::= DeclarePart      ["PROCEDURE","VAR","BEGIN","TYPE"]
     void process55() {
         pushSymbol(55);
     }
 
+    //ProcBody ::= ProgramBody     ["BEGIN"]
     void process56() {
         pushSymbol(56);
     }
 
+    //ProgramBody ::= BEGIN StmList END        ["BEGIN"]
     void process57() {
         pushSymbol(57);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = AllName.NodeKind.StmLK;
+        if (treeNode.lineno != 0) {
+            treeNode.lineno = getCurrentToken().getLineShow();
+        }
+        TreeNode peek = nodeStack.peek();
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
     }
 
+    //StmList ::= Stm StmMore      ["READ","RETURN","WHILE","ID","IF","WRITE"]
     void process58() {
         pushSymbol(58);
     }
 
+    //StmMore ::= $            ["FI","ELSE","END","ENDWH"]
     void process59() {
         pushSymbol(59);
+        while (nodeStack.peek().nodeKind != StmLK) {
+            nodeStack.pop();
+        }
+        nodeStack.pop();
     }
 
+    //StmMore ::= ; StmList    ["SEMI"]
     void process60() {
         pushSymbol(60);
     }

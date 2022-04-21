@@ -31,7 +31,7 @@ public class AllName {
     public static enum NodeKind {
         //默认值
         NodeKindDefault,
-        ProK, PheadK, TypeK, VarK, ProcDecK, StmLK, DecK, StmtK, ExpK, TotalDecK,ParamDeck,ProBody,ProcBody
+        ProK, PheadK, TypeK, VarK, ProcDecK, StmLK, DecK, StmtK, ExpK, TotalDecK,ParamDeck
     }
 
     //语法树的节点的具体类型
