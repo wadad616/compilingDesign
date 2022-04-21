@@ -453,7 +453,7 @@ public class DescentMethod {
      **/
     void fieldDecList(TreeNode t) {
         TreeNode treeNode = new TreeNode();
-        treeNode.nodeKind = TypeK;
+        treeNode.nodeKind = DecK;
         t.boolChild();
         if (match(new String[]{"CHAR", "INTEGER"})) {
             //进行此处生成的memberKine 中的定义

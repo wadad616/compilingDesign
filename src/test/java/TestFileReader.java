@@ -218,7 +218,7 @@ public class TestFileReader {
     @Test
     public void testProcessGenerate(){
         for(int i=1;i<=104;i++){
-            System.out.println("void process"+i+"() {}");
+            System.out.println("void process"+i+"() {pushSymbol("+i+");}");
         }
     }
     @Test

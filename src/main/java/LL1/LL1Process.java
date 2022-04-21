@@ -8,11 +8,12 @@ import lexicalAnalysis.LexToken;
 
 import java.util.*;
 
-import static Utils.AllName.NodeKind.TypeK;
+import static Utils.AllName.NodeKind.*;
 
 
 //注意压栈需要反向压栈，注意初始化的时候就是反向的
-
+//每次做题的时候注意一下栈内的状态
+//结果为$ 的地方需要改进
 public class LL1Process {
     //表示的token序列
     List<LexToken> tokenList;
@@ -189,7 +190,7 @@ public class LL1Process {
                 }
             } else {
                 Integer integer = LL1Table.get(symbolStack.peek()).get(tokenList.get(tokenIndex));
-                if(integer==null){
+                if (integer == null) {
                     //错误处理
                 }
                 predict(integer);
@@ -239,6 +240,7 @@ public class LL1Process {
         peek.boolName();
         peek.name.add(sem);
         peek.idNum++;
+        peek.lineno = getCurrentToken().getLineShow();
         pushSymbol(2, 1);
     }
 
@@ -250,29 +252,11 @@ public class LL1Process {
      * @Date 2022/4/21 18:40
      **/
     void process4() {
+        pushSymbol(4);
         TreeNode treeNode = nodeStack.peek();
         treeNode.boolChild();
         //总体声明
         treeNode.nodeKind = AllName.NodeKind.TotalDecK;
-
-        //TypeK
-        TreeNode t = new TreeNode();
-        treeNode.boolChild();
-        t.nodeKind = TypeK;
-
-        //VarK
-        TreeNode v = new TreeNode();
-        treeNode.boolChild();
-        t.nodeKind = AllName.NodeKind.VarK;
-
-
-        treeNode.child.add(t);
-        t.father = treeNode;
-        treeNode.child.add(v);
-        v.father = treeNode;
-
-        nodeStack.push(v);
-        nodeStack.push(t);
     }
 
     /**
@@ -280,309 +264,634 @@ public class LL1Process {
      * TypeDec ::= $                   ["PROCEDURE","VAR","BEGIN"]
      * TODO
      * @Date 2022/4/21 18:52
-    **/
+     **/
     void process5() {
     }
+
     /**
-     * @Description
+     * @Description 基本操作
+     * TypeDec ::= TypeDeclaration     ["TYPE"]
      * TODO
      * @Date 2022/4/21 18:55
-    **/
+     **/
     void process6() {
+        pushSymbol(6);
     }
 
+    /**
+     * @Description 想了一下能够进入这里就说明了必定匹配成功了 新建了节点 有压栈无出栈
+     * TypeDeclaration ::= TYPE TypeDecList  ["TYPE"]
+     * TODO
+     * @Date 2022/4/21 19:03
+     **/
     void process7() {
+        pushSymbol(7);
+        //建立基本的父子关系
+        //TypeK
+        TreeNode t = new TreeNode();
+        t.nodeKind = TypeK;
+        LexToken token = getCurrentToken();
+        t.lineno = token.getLineShow();
+        TreeNode peek = nodeStack.peek();
+        peek.child.add(t);
+        t.father = peek;
+        nodeStack.push(t);
     }
 
+    /**
+     * @Description 有压栈 进行基础设置
+     * TypeDecList ::= TypeId = TypeName ; TypeDecMore  ["ID"]
+     * TODO
+     * @Date 2022/4/21 19:11
+     **/
     void process8() {
+        pushSymbol(8);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = AllName.NodeKind.DecK;
+        TreeNode peek = nodeStack.peek();
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
     }
 
+    /**
+     * @Description 无作用 我尝试一下先全部弹掉
+     * TypeDecMore ::= $                ["PROCEDURE","VAR","BEGIN"]
+     * TODO
+     * @Date 2022/4/21 19:17
+     **/
     void process9() {
+        while (nodeStack.peek().nodeKind != AllName.NodeKind.TypeK) {
+            nodeStack.pop();
+        }
+        //最终需要将这弹出
+        nodeStack.pop();
     }
 
+    /**
+     * @Description 基本处理
+     * TypeDecMore ::= TypeDecList      ["ID"]
+     * TODO
+     * @Date 2022/4/21 19:18
+     **/
     void process10() {
+        pushSymbol(10);
     }
 
+
+    /**
+     * @Description 进行DecK节点的内容的补充
+     * TypeId ::= ID    ["ID"]
+     * TODO Test
+     * @Date 2022/4/21 19:18
+     **/
     void process11() {
+        pushSymbol(11);
+        TreeNode peek = nodeStack.peek();
+        peek.lineno = getCurrentToken().getLineShow();
+        peek.boolName();
+        peek.name.add(getCurrentToken().getSem());
+        peek.idNum++;
     }
 
+    /**
+     * @Description 无操作
+     * TypeName ::= BaseType        ["CHAR","INTEGER"]
+     * TODO
+     * @Date 2022/4/21 19:21
+     **/
     void process12() {
+        pushSymbol(12);
     }
 
+    /**
+     * @Description 无操纵
+     * TypeName ::= StructureType   ["ARRAY","RECORD"]
+     * TODO
+     * @Date 2022/4/21 19:23
+     **/
     void process13() {
+        pushSymbol(13);
     }
 
+    /**
+     * @Description 无操作
+     * TypeName ::= ID              ["ID"]
+     * TODO
+     * @Date 2022/4/21 19:27
+     **/
     void process14() {
+        pushSymbol(14);
+        TreeNode t = nodeStack.peek();
+        t.memberKind = AllName.memberKind.IdK;
+        t.idNum++;
+        t.boolName();
+        t.name.add(getCurrentToken().getSem());
+        if (t.typeName == null) {
+            t.typeName = new ArrayList<>();
+        }
+        t.typeName.add(getCurrentToken().getSem());
+        if (t.lineno != 0) {
+            t.lineno = getCurrentToken().getLineShow();
+        }
     }
 
+    /**
+     * @Description 设置类型
+     * BaseType ::= INTEGER     ["INTEGER"]
+     * TODO
+     * @Date 2022/4/21 20:28
+     **/
     void process15() {
+        pushSymbol(15);
+        TreeNode t = nodeStack.peek();
+        t.memberKind = AllName.memberKind.IntegerK;
+        if (t.lineno != 0) {
+            t.lineno = getCurrentToken().getLineShow();
+        }
     }
 
+    /**
+     * @Description 设置类型
+     * TODO
+     * @Date 2022/4/21 20:29
+     **/
     void process16() {
+        pushSymbol(16);
+        TreeNode t = nodeStack.peek();
+        t.memberKind = AllName.memberKind.CharK;
+        if (t.lineno != 0) {
+            t.lineno = getCurrentToken().getLineShow();
+        }
     }
 
+    //StructureType ::= ArrayType      ["ARRAY"]
     void process17() {
+        pushSymbol(17);
     }
 
+    //StructureType ::= RecType        ["RECORD"]
     void process18() {
+        pushSymbol(18);
     }
 
+
+    //ArrayType ::= ARRAY [ Low .. Top ] OF BaseType   ["ARRAY"]
     void process19() {
+        pushSymbol(19);
+        TreeNode t = nodeStack.peek();
+        t.memberKind = AllName.memberKind.ArrayK;
+        if (t.lineno != 0) {
+            t.lineno = getCurrentToken().getLineShow();
+        }
+        t.setAttr("array");
     }
 
+    //Low ::= INTC     ["INTC"]
     void process20() {
+        pushSymbol(20);
+        TreeNode t = nodeStack.peek();
+        int i = 0;
+        try {
+            i = Integer.parseInt(getCurrentToken().getSem());
+        } catch (Exception e) {
+            //错误处理
+        }
+        t.attr.arrayAttr.low = i;
+
     }
 
+    //Top ::= INTC     ["INTC"]
     void process21() {
+        pushSymbol(21);
+        TreeNode t = nodeStack.peek();
+        int i = 0;
+        try {
+            i = Integer.parseInt(getCurrentToken().getSem());
+        } catch (Exception e) {
+            //错误处理
+        }
+        t.attr.arrayAttr.low = i;
     }
 
+    //RecType ::= RECORD FieldDecList END      ["RECORD"]
+    //可能需要一个 临时的saveP
     void process22() {
+        pushSymbol(22);
+        TreeNode t = nodeStack.peek();
+        t.memberKind = AllName.memberKind.ReturnK;
+        if (t.lineno != 0) {
+            t.lineno = getCurrentToken().getLineShow();
+        }
     }
 
+    //FieldDecList ::= BaseType IdList ; FieldDecMore      ["CHAR","INTEGER"]
     void process23() {
+        pushSymbol(23);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = AllName.NodeKind.DecK;
+        TreeNode peek = nodeStack.peek();
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
     }
 
+    //FieldDecList ::= ArrayType IdList ; FieldDecMore     ["ARRAY"]
     void process24() {
+        pushSymbol(24);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = AllName.NodeKind.DecK;
+        TreeNode peek = nodeStack.peek();
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
     }
 
+    //FieldDecMore ::= $                   ["END"]
     void process25() {
+        while (nodeStack.peek().memberKind != AllName.memberKind.RecordK) {
+            nodeStack.pop();
+        }
+        nodeStack.pop();
     }
 
+    //FieldDecMore ::= FieldDecList        ["ARRAY","CHAR","INTEGER"]
     void process26() {
+        pushSymbol(26);
     }
 
+
+    //IdList ::= ID IdMore     ["ID"]
     void process27() {
+        pushSymbol(27);
+        TreeNode peek = nodeStack.peek();
+        peek.boolName();
+        peek.name.add(getCurrentToken().getSem());
+        peek.idNum++;
     }
 
+    //IdMore ::= $             [";"]
     void process28() {
+        pushSymbol(28);
     }
 
+    //IdMore ::= , IdList      [","]
     void process29() {
+        pushSymbol(29);
     }
 
+
+    //VarDec ::= $                 ["PROCEDURE","BEGIN"]
+    //有 $但不需要进行基本运算的地方
     void process30() {
+        pushSymbol(30);
     }
 
+    //VarDec ::= VarDeclaration    ["VAR"]
     void process31() {
+        pushSymbol(31);
     }
 
+    //VarDeclaration ::= VAR VarDecList    ["VAR"]
     void process32() {
+        pushSymbol(32);
+        TreeNode t = new TreeNode();
+        t.nodeKind = VarK;
+        LexToken token = getCurrentToken();
+        t.lineno = token.getLineShow();
+        TreeNode peek = nodeStack.peek();
+        peek.child.add(t);
+        t.father = peek;
+        nodeStack.push(t);
     }
 
+    //VarDecList ::= TypeName VarIdList ; VarDecMore   ["ARRAY","RECORD","CHAR","ID","INTEGER"]
     void process33() {
+        pushSymbol(33);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = AllName.NodeKind.DecK;
+        TreeNode peek = nodeStack.peek();
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
     }
 
+    //VarDecMore ::= $             ["PROCEDURE","BEGIN"]
+    //等下再来这里
     void process34() {
+        while (nodeStack.peek().nodeKind != VarK) {
+            nodeStack.pop();
+        }
+        nodeStack.pop();
+
     }
 
+    //VarDecMore ::= VarDecList    ["ARRAY","RECORD","CHAR","ID","INTEGER"]
     void process35() {
+        pushSymbol(35);
     }
 
+    //VarIdList ::= ID VarIdMore       ["ID"]
     void process36() {
+        pushSymbol(36);
+        TreeNode peek = nodeStack.peek();
+        peek.boolName();
+        peek.name.add(getCurrentToken().getSem());
+        peek.idNum++;
     }
 
+    //VarIdMore ::= $              [";"]
     void process37() {
+        pushSymbol(37);
     }
 
+    //VarIdMore ::= , VarIdList    [","]
     void process38() {
+        pushSymbol(38);
     }
 
+
+    //ProcDec ::= $                ["BEGIN"]
     void process39() {
+        pushSymbol(39);
     }
 
+    //ProcDec ::= ProcDeclaration  ["PROCEDURE"]
     void process40() {
+        pushSymbol(40);
     }
 
+
+    //ProcDeclaration ::= PROCEDURE ProcName ( ParamList ) ; ProcDecPart ProcBody ProcDecMore   ["PROCEDURE"]
     void process41() {
+        pushSymbol(41);
+        TreeNode t = new TreeNode();
+        t.nodeKind = ProK;
+        LexToken token = getCurrentToken();
+        t.lineno = token.getLineShow();
+        TreeNode peek = nodeStack.peek();
+        peek.child.add(t);
+        t.father = peek;
+        nodeStack.push(t);
     }
 
+    //ProcDecMore ::= $                ["BEGIN"]
     void process42() {
+        pushSymbol(42);
+        while (nodeStack.peek().nodeKind!= ProK) {
+            nodeStack.pop();
+        }
+        nodeStack.pop();
     }
 
+    //ProcDecMore ::= ProcDeclaration  ["PROCEDURE"]
     void process43() {
+        pushSymbol(43);
     }
 
+    //ProcName ::= ID                       ["ID"]
     void process44() {
+        pushSymbol(44);
     }
 
     void process45() {
+        pushSymbol(45);
     }
 
     void process46() {
+        pushSymbol(46);
     }
 
     void process47() {
+        pushSymbol(47);
     }
 
     void process48() {
+        pushSymbol(48);
     }
 
     void process49() {
+        pushSymbol(49);
     }
 
     void process50() {
+        pushSymbol(50);
     }
 
     void process51() {
+        pushSymbol(51);
     }
 
     void process52() {
+        pushSymbol(52);
     }
 
     void process53() {
+        pushSymbol(53);
     }
 
     void process54() {
+        pushSymbol(54);
     }
 
     void process55() {
+        pushSymbol(55);
     }
 
     void process56() {
+        pushSymbol(56);
     }
 
     void process57() {
+        pushSymbol(57);
     }
 
     void process58() {
+        pushSymbol(58);
     }
 
     void process59() {
+        pushSymbol(59);
     }
 
     void process60() {
+        pushSymbol(60);
     }
 
     void process61() {
+        pushSymbol(61);
     }
 
     void process62() {
+        pushSymbol(62);
     }
 
     void process63() {
+        pushSymbol(63);
     }
 
     void process64() {
+        pushSymbol(64);
     }
 
     void process65() {
+        pushSymbol(65);
     }
 
     void process66() {
+        pushSymbol(66);
     }
 
     void process67() {
+        pushSymbol(67);
     }
 
     void process68() {
+        pushSymbol(68);
     }
 
     void process69() {
+        pushSymbol(69);
     }
 
     void process70() {
+        pushSymbol(70);
     }
 
     void process71() {
+        pushSymbol(71);
     }
 
     void process72() {
+        pushSymbol(72);
     }
 
     void process73() {
+        pushSymbol(73);
     }
 
     void process74() {
+        pushSymbol(74);
     }
 
     void process75() {
+        pushSymbol(75);
     }
 
     void process76() {
+        pushSymbol(76);
     }
 
     void process77() {
+        pushSymbol(77);
     }
 
     void process78() {
+        pushSymbol(78);
     }
 
     void process79() {
+        pushSymbol(79);
     }
 
     void process80() {
+        pushSymbol(80);
     }
 
     void process81() {
+        pushSymbol(81);
     }
 
     void process82() {
+        pushSymbol(82);
     }
 
     void process83() {
+        pushSymbol(83);
     }
 
     void process84() {
+        pushSymbol(84);
     }
 
     void process85() {
+        pushSymbol(85);
     }
 
     void process86() {
+        pushSymbol(86);
     }
 
     void process87() {
+        pushSymbol(87);
     }
 
     void process88() {
+        pushSymbol(88);
     }
 
     void process89() {
+        pushSymbol(89);
     }
 
     void process90() {
+        pushSymbol(90);
     }
 
     void process91() {
+        pushSymbol(91);
     }
 
     void process92() {
+        pushSymbol(92);
     }
 
     void process93() {
+        pushSymbol(93);
     }
 
     void process94() {
+        pushSymbol(94);
     }
 
     void process95() {
+        pushSymbol(95);
     }
 
     void process96() {
+        pushSymbol(96);
     }
 
     void process97() {
+        pushSymbol(97);
     }
 
     void process98() {
+        pushSymbol(98);
     }
 
     void process99() {
+        pushSymbol(99);
     }
 
     void process100() {
+        pushSymbol(100);
     }
 
     void process101() {
+        pushSymbol(101);
     }
 
     void process102() {
+        pushSymbol(102);
     }
 
     void process103() {
+        pushSymbol(103);
     }
 
     void process104() {
+        pushSymbol(104);
     }
 
     void predict(int num) {
