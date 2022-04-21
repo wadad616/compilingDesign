@@ -17,6 +17,7 @@ import static Utils.AllName.NodeKind.*;
 // 第二改一下有些出栈的过程需要进行修改，父节点不一定需要进行弹出
 //往回看一下有进行树间关系连接的时候，父亲是否是父亲
 //TODO 一个more可能有多个地方会使用到，看看前面有没有使用到
+//TODO 之前许多节点创建的时候并没有进行压栈操作
 public class LL1Process {
     //表示的token序列
     List<LexToken> tokenList;
@@ -43,6 +44,9 @@ public class LL1Process {
     public Set<String> VT;
     //非终结符
     public Set<String> VN;
+
+    TreeNode ifNode;
+    TreeNode whenNode;
 
     public LL1Process(List<LexToken> tokenList) {
         this.tokenList = tokenList;
@@ -782,21 +786,26 @@ public class LL1Process {
     }
 
     //StmMore ::= $            ["FI","ELSE","END","ENDWH"]
+    //这个的作用就是弹两次
     void process59() {
         pushSymbol(59);
-        while (nodeStack.peek().nodeKind != StmLK) {
-            nodeStack.pop();
-        }
-        nodeStack.pop();
+
     }
 
     //StmMore ::= ; StmList    ["SEMI"]
     void process60() {
         pushSymbol(60);
+        nodeStack.pop();
     }
-
+    //Stm ::= ConditionalStm
     void process61() {
         pushSymbol(61);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = AllName.NodeKind.DecK;
+        TreeNode peek = nodeStack.peek();
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
     }
 
     void process62() {
