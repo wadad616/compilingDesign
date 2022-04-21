@@ -15,6 +15,7 @@ import static Utils.AllName.NodeKind.*;
 //每次做题的时候注意一下栈内的状态
 //结果为$ 的地方需要改进.第一改进一下那个压栈函数
 // 第二改一下有些出栈的过程需要进行修改，父节点不一定需要进行弹出
+//往回看一下有进行树间关系连接的时候，父亲是否是父亲
 public class LL1Process {
     //表示的token序列
     List<LexToken> tokenList;
@@ -445,7 +446,10 @@ public class LL1Process {
         if (t.lineno != 0) {
             t.lineno = getCurrentToken().getLineShow();
         }
-        t.setAttr("array");
+        if(t.attr!=null){
+            t.setAttr("array");
+        }
+
     }
 
     //Low ::= INTC     ["INTC"]
@@ -660,6 +664,8 @@ public class LL1Process {
     }
 
     //ParamList ::= $              ["RPAREN"]
+    //这里还需要
+    //TODO 记得补上
     void process45() {
         pushSymbol(45);
 
@@ -668,6 +674,12 @@ public class LL1Process {
     //ParamList ::= ParamDecList   ["ARRAY","VAR","RECORD","CHAR","ID","INTEGER"]
     void process46() {
         pushSymbol(46);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = ParamDeck;
+        TreeNode peek = nodeStack.peek();
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
     }
 
     //ParamDecList ::= Param ParamMore     ["ARRAY","VAR","RECORD","CHAR","ID","INTEGER"]
@@ -678,18 +690,46 @@ public class LL1Process {
     //ParamMore ::= $                  ["RPAREN"]
     void process48() {
         pushSymbol(48);
+        while (nodeStack.peek().nodeKind != ParamDeck) {
+            nodeStack.pop();
+        }
+        nodeStack.pop();
     }
 
+    //ParamMore ::= ; ParamDecList     ["SEMI"]
     void process49() {
         pushSymbol(49);
+        nodeStack.pop();
     }
-
+    //Param ::= TypeName FormList          ["ARRAY","RECORD","CHAR","ID","INTEGER"]
     void process50() {
         pushSymbol(50);
+        //基础设置
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = AllName.NodeKind.DecK;
+        TreeNode peek = nodeStack.peek();
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
+        if (treeNode.attr == null) {
+            treeNode.setAttr("proc");
+        }
+        treeNode.attr.procAttr.paramType = AllName.LexType.ValParamType;
     }
 
+    //Param ::= VAR TypeName FormList      ["VAR"]
     void process51() {
         pushSymbol(51);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = AllName.NodeKind.DecK;
+        TreeNode peek = nodeStack.peek();
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
+        if (treeNode.attr == null) {
+            treeNode.setAttr("proc");
+        }
+        treeNode.attr.procAttr.paramType = AllName.LexType.VarParaType;
     }
 
     void process52() {
