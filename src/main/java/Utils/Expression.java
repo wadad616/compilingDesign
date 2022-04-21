@@ -1,10 +1,13 @@
 package Utils;
 
+import lombok.Data;
+
 import java.util.List;
 
+@Data
 public class Expression {
-    String leftExp;
-    List<String> rightExp;
+    public String leftExp;
+    public List<String> rightExp;
 
     public Expression() {
     }

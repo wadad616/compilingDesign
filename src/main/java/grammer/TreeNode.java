@@ -9,27 +9,27 @@ import java.util.List;
 @Data
 public class TreeNode {
     //为子语法树的节点
-    List<TreeNode> child;
+    public List<TreeNode> child;
     //指向兄弟节点
-    TreeNode sibling;
+    public TreeNode sibling;
     //记录父亲节点
-    TreeNode father;
+    public TreeNode father;
     //记录在源程序的行号
-    int lineno;
+    public int lineno;
     //语法树节点类型
-    AllName.NodeKind nodeKind;
+    public AllName.NodeKind nodeKind;
     //成员节点类型
-    AllName.memberKind memberKind;
+    public AllName.memberKind memberKind;
     //节点个数
-    int idNum = 0;
+    public int idNum = 0;
     //节点中各个标识符的名字
-    List<String> name;
+    public List<String> name;
     //暂定
-    List<Integer> table;
+    public List<Integer> table;
     //暂时不知道有什么用，该怎么去使用
-    List<String> typeName;
+    public List<String> typeName;
     //记录语法树节点的其他属性
-    Attr attr;
+    public Attr attr;
 
     public TreeNode() {
         nodeKind = AllName.NodeKind.NodeKindDefault;

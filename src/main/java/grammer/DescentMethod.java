@@ -16,8 +16,8 @@ import static Utils.AllName.NodeKind.*;
 //注意在varimore中设置一下exp的attr
 //调用语句的儿子为Exp ，名字是一个exp 算了
 //我觉得不能这样  调用语句有标识符，不同于一般赋值语句 左式的标识符也是表达式
-
 //找一下警告中的used 判断一下程序中的错误
+//type 和 var 处有点问题 可能没有type 和var！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
 public class DescentMethod {
     //表示的token序列
     List<LexToken> tokenList;

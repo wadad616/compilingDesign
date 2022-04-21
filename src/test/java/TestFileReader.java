@@ -210,5 +210,22 @@ public class TestFileReader {
             System.out.println(s);
         }
     }
+    @Test
+    public void testStack(){
+        //注意就是使用pop  push   peek
+        Stack<String>strings=new Stack<>();
+    }
+    @Test
+    public void testProcessGenerate(){
+        for(int i=1;i<=104;i++){
+            System.out.println("void process"+i+"() {}");
+        }
+    }
+    @Test
+    public void testGenerate1(){
+        for(int i=1;i<=104;i++){
+            System.out.println("case "+i+": process"+i+"();break;");
+        }
+    }
 
 }

@@ -1,4 +1,4 @@
-Program ::= ProgramHead DeclarePart ProgramBody                                           ["PROGRAM"]
+Program ::= ProgramHead DeclarePart ProgramBody .                                         ["PROGRAM"]
 ProgramHead ::= PROGRAM ProgramName                                                       ["PROGRAM"]
 ProgramName ::= ID                                                                        ["ID"]
 DeclarePart ::= TypeDec VarDec ProcDec                                                    ["PROCEDURE","VAR","BEGIN","TYPE"]
