@@ -13,7 +13,8 @@ import static Utils.AllName.NodeKind.*;
 
 //注意压栈需要反向压栈，注意初始化的时候就是反向的
 //每次做题的时候注意一下栈内的状态
-//结果为$ 的地方需要改进
+//结果为$ 的地方需要改进.第一改进一下那个压栈函数
+// 第二改一下有些出栈的过程需要进行修改，父节点不一定需要进行弹出
 public class LL1Process {
     //表示的token序列
     List<LexToken> tokenList;
@@ -626,7 +627,7 @@ public class LL1Process {
     void process41() {
         pushSymbol(41);
         TreeNode t = new TreeNode();
-        t.nodeKind = ProK;
+        t.nodeKind = ProcDecK;
         LexToken token = getCurrentToken();
         t.lineno = token.getLineShow();
         TreeNode peek = nodeStack.peek();
@@ -652,20 +653,29 @@ public class LL1Process {
     //ProcName ::= ID                       ["ID"]
     void process44() {
         pushSymbol(44);
+        TreeNode peek = nodeStack.peek();
+        peek.boolName();
+        peek.name.add(getCurrentToken().getSem());
+        peek.idNum++;
     }
 
+    //ParamList ::= $              ["RPAREN"]
     void process45() {
         pushSymbol(45);
+
     }
 
+    //ParamList ::= ParamDecList   ["ARRAY","VAR","RECORD","CHAR","ID","INTEGER"]
     void process46() {
         pushSymbol(46);
     }
 
+    //ParamDecList ::= Param ParamMore     ["ARRAY","VAR","RECORD","CHAR","ID","INTEGER"]
     void process47() {
         pushSymbol(47);
     }
 
+    //ParamMore ::= $                  ["RPAREN"]
     void process48() {
         pushSymbol(48);
     }
