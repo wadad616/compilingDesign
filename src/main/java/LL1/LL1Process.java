@@ -18,6 +18,7 @@ import static Utils.AllName.NodeKind.*;
 //往回看一下有进行树间关系连接的时候，父亲是否是父亲
 //TODO 一个more可能有多个地方会使用到，看看前面有没有使用到
 //TODO 之前许多节点创建的时候并没有进行压栈操作
+//todo if语句和when语句可以进行适当的调整，将if语句中的then和else当成两个if语句的儿子，而不是同级别
 public class LL1Process {
     //表示的token序列
     List<LexToken> tokenList;
@@ -451,7 +452,7 @@ public class LL1Process {
         if (t.lineno != 0) {
             t.lineno = getCurrentToken().getLineShow();
         }
-        if(t.attr!=null){
+        if (t.attr != null) {
             t.setAttr("array");
         }
 
@@ -648,7 +649,7 @@ public class LL1Process {
     //ProcDecMore ::= $                ["BEGIN"]
     void process42() {
         pushSymbol(42);
-        while (nodeStack.peek().nodeKind!= ProK) {
+        while (nodeStack.peek().nodeKind != ProK) {
             nodeStack.pop();
         }
         nodeStack.pop();
@@ -706,6 +707,7 @@ public class LL1Process {
         pushSymbol(49);
         nodeStack.pop();
     }
+
     //Param ::= TypeName FormList          ["ARRAY","RECORD","CHAR","ID","INTEGER"]
     void process50() {
         pushSymbol(50);
@@ -797,51 +799,70 @@ public class LL1Process {
         pushSymbol(60);
         nodeStack.pop();
     }
+
     //Stm ::= ConditionalStm
     void process61() {
-        pushSymbol(61);
-        TreeNode treeNode = new TreeNode();
-        treeNode.nodeKind = AllName.NodeKind.DecK;
-        TreeNode peek = nodeStack.peek();
-        peek.boolChild();
-        peek.child.add(treeNode);
-        treeNode.father = peek;
     }
 
+    //Stm ::= LoopStm          ["WHILE"]
     void process62() {
         pushSymbol(62);
     }
 
+    //Stm ::= InputStm         ["READ"]
     void process63() {
         pushSymbol(63);
     }
 
+    //Stm ::= OutputStm        ["WRITE"]
     void process64() {
         pushSymbol(64);
     }
 
+    //Stm ::= ReturnStm        ["RETURN"]
     void process65() {
         pushSymbol(65);
     }
 
+    //Stm ::= ID AssCall       ["ID"]
     void process66() {
         pushSymbol(66);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = StmtK;
+        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode.name = new ArrayList<>();
+        treeNode.name.add(getCurrentToken().getSem());
+        treeNode.idNum++;
+        //为了之后创建的东西
+        TreeNode peek = nodeStack.peek();
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
+
+        //进行压栈
+        nodeStack.push(treeNode);
     }
 
+    //AssCall ::= AssignmentRest       ["DOT","ASSIGN","LMIDPAREN"]
     void process67() {
         pushSymbol(67);
+        nodeStack.peek().memberKind= AllName.memberKind.AssignK;
     }
-
+    //AssCall ::= CallStmRest          ["LPAREN"]
     void process68() {
         pushSymbol(68);
+        nodeStack.peek().memberKind= AllName.memberKind.CallK;
     }
 
+    //AssignmentRest ::= VariMore := Exp       ["DOT","ASSIGN","LMIDPAREN"]
     void process69() {
         pushSymbol(69);
     }
 
+    //ConditionalStm ::= IF RelExp THEN StmList ELSE StmList FI    ["IF"]
     void process70() {
         pushSymbol(70);
+
     }
 
     void process71() {
