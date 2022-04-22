@@ -34,7 +34,10 @@ public class LL1Process {
     Stack<TreeNode> nodeStack;
 
     //运算符栈
-    Stack<String> typeStack;
+    Stack<TreeNode> typeStack;
+
+    //表达式节点栈
+    Stack<TreeNode> expStack;
 
     //LL1表
     Map<String, Map<String, Integer>> LL1Table;
@@ -49,6 +52,7 @@ public class LL1Process {
 
     TreeNode ifNode;
     TreeNode whenNode;
+    TreeNode tempVarNode;
 
     public LL1Process(List<LexToken> tokenList) {
         this.tokenList = tokenList;
@@ -131,18 +135,27 @@ public class LL1Process {
         return tokenIndex == tokenList.size();
     }
 
-    int getPri(AllName.LexType type) {
+    int getPri(String type) {
         switch (type) {
-            case DOT:
+            case "DOT":
                 return 0;
-            case LT, EQ:
+            case "LT", "EQ":
                 return 1;
-            case PLUS, MINUS:
+            case "PLUS", "MINUS":
                 return 2;
-            case TIMES, OVER:
+            case "TIMES", "OVER":
                 return 3;
             default:
                 return -1;
+        }
+    }
+
+    int getCurrentPri() {
+        if (typeStack.empty()) {
+            return 0;
+        } else {
+            //获得操作符的符号
+            return getPri(typeStack.peek().attr.expAttr.op.toString());
         }
     }
 
@@ -831,9 +844,28 @@ public class LL1Process {
         TreeNode treeNode = new TreeNode();
         treeNode.nodeKind = StmtK;
         treeNode.lineno = getCurrentToken().getLineShow();
-        treeNode.name = new ArrayList<>();
-        treeNode.name.add(getCurrentToken().getSem());
-        treeNode.idNum++;
+
+
+        //由于赋值表达式的左部必定是一个变量表达式节点，所以先创建一个节点
+
+
+        TreeNode treeNode1 = new TreeNode();
+        treeNode1.nodeKind = ExpK;
+        treeNode1.boolName();
+        treeNode1.name.add(getCurrentToken().getSem());
+
+        treeNode1.name = new ArrayList<>();
+        treeNode1.name.add(getCurrentToken().getSem());
+        treeNode1.idNum++;
+
+        //像这种只可以为标识符类型
+        treeNode1.memberKind = AllName.memberKind.IdK;
+        treeNode1.idNum++;
+        //现在还无法判断此节点的ExpAttr的内容
+
+        treeNode.boolChild();
+        treeNode.child.add(treeNode1);
+
         //为了之后创建的东西
         TreeNode peek = nodeStack.peek();
         peek.boolChild();
@@ -842,22 +874,49 @@ public class LL1Process {
 
         //进行压栈
         nodeStack.push(treeNode);
+        tempVarNode = treeNode1;
+
+        //进行表达式节点压栈
+        expStack.push(treeNode1);
     }
 
     //AssCall ::= AssignmentRest       ["DOT","ASSIGN","LMIDPAREN"]
     void process67() {
         pushSymbol(67);
-        nodeStack.peek().memberKind= AllName.memberKind.AssignK;
+        nodeStack.peek().memberKind = AllName.memberKind.AssignK;
+
+
     }
+
     //AssCall ::= CallStmRest          ["LPAREN"]
     void process68() {
         pushSymbol(68);
-        nodeStack.peek().memberKind= AllName.memberKind.CallK;
+        nodeStack.peek().memberKind = AllName.memberKind.CallK;
     }
 
     //AssignmentRest ::= VariMore := Exp       ["DOT","ASSIGN","LMIDPAREN"]
+    //VariMore交给了tempVar进行处理
     void process69() {
         pushSymbol(69);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = ExpK;
+        //现在还无法知道Exp的类型
+
+        //注意一下VariMore中弹栈操作！！！
+        TreeNode peek = nodeStack.peek();
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
+
+
+        //压栈操作
+        //需要注意Exp的弹栈操作
+        nodeStack.push(treeNode);
+
+        //进行表达式节点压栈
+        expStack.push(treeNode);
+
+
     }
 
     //ConditionalStm ::= IF RelExp THEN StmList ELSE StmList FI    ["IF"]
@@ -870,18 +929,17 @@ public class LL1Process {
         treeNode.memberKind = AllName.memberKind.IfK;
 
         TreeNode treeNode1 = new TreeNode();
-        treeNode.nodeKind = ExpK;
-        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode1.nodeKind = ExpK;
 
         TreeNode treeNode2 = new TreeNode();
-        treeNode.nodeKind = StmtK;
-        treeNode.lineno = getCurrentToken().getLineShow();
-        treeNode.memberKind = AllName.memberKind.ThenK;
+        treeNode2.nodeKind = StmtK;
+        treeNode2.lineno = getCurrentToken().getLineShow();
+        treeNode2.memberKind = AllName.memberKind.ThenK;
 
         TreeNode treeNode3 = new TreeNode();
-        treeNode.nodeKind = StmtK;
-        treeNode.lineno = getCurrentToken().getLineShow();
-        treeNode.memberKind = AllName.memberKind.ElseK;
+        treeNode3.nodeKind = StmtK;
+        treeNode3.lineno = getCurrentToken().getLineShow();
+        treeNode3.memberKind = AllName.memberKind.ElseK;
 
         treeNode.boolChild();
         treeNode.child.add(treeNode1);
@@ -899,6 +957,8 @@ public class LL1Process {
         nodeStack.push(treeNode2);
         nodeStack.push(treeNode1);
 
+        //进行表达式节点压栈
+        expStack.push(treeNode1);
     }
 
     //LoopStm ::= WHILE RelExp DO StmList ENDWH       ["WHILE"]
@@ -910,14 +970,13 @@ public class LL1Process {
         treeNode.memberKind = AllName.memberKind.WhileK;
 
         TreeNode treeNode1 = new TreeNode();
-        treeNode.nodeKind = ExpK;
-        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode1.nodeKind = ExpK;
 
 
         TreeNode treeNode2 = new TreeNode();
-        treeNode.nodeKind = StmtK;
-        treeNode.lineno = getCurrentToken().getLineShow();
-        treeNode.memberKind = AllName.memberKind.DoK;
+        treeNode2.nodeKind = StmtK;
+        treeNode2.lineno = getCurrentToken().getLineShow();
+        treeNode2.memberKind = AllName.memberKind.DoK;
 
         treeNode.boolChild();
         treeNode.child.add(treeNode1);
@@ -932,6 +991,9 @@ public class LL1Process {
         nodeStack.push(treeNode);
         nodeStack.push(treeNode2);
         nodeStack.push(treeNode1);
+
+        //进行表达式节点压栈
+        expStack.push(treeNode1);
     }
 
 
@@ -971,11 +1033,26 @@ public class LL1Process {
         treeNode.lineno = getCurrentToken().getLineShow();
         treeNode.memberKind = AllName.memberKind.WriteK;
 
+        //此处是Exp,需要进行提前压栈
+        TreeNode treeNode1 = new TreeNode();
+        treeNode1.nodeKind = ExpK;
+
+        treeNode.boolChild();
+        treeNode.child.add(treeNode1);
+
+
         //建立Stmt和Stml的关系 或者是Stmt和Stmt关系
         TreeNode peek = nodeStack.peek();
         peek.boolChild();
         peek.child.add(treeNode);
         treeNode.father = peek;
+
+        //压栈操作
+        nodeStack.push(treeNode);
+        nodeStack.push(treeNode1);
+
+        //进行表达式节点压栈
+        expStack.push(treeNode1);
     }
 
     //ReturnStm ::= RETURN    ["RETURN"]
@@ -993,40 +1070,89 @@ public class LL1Process {
         treeNode.father = peek;
     }
 
-
+    //CallStmRest ::= ( ActParamList )     ["LPAREN"]
     void process76() {
         pushSymbol(76);
     }
 
-    //CallStmRest ::= ( ActParamList )     ["LPAREN"]
+    //ActParamList ::= $                   ["RPAREN"]
+
     void process77() {
         pushSymbol(77);
-
     }
 
-    //ActParamList ::= $                   ["RPAREN"]
-    //这里需要进行弹栈，似乎不需要进行双弹
+    //ActParamList ::= Exp ActParamMore    ["INTC","LPAREN","ID"]
     void process78() {
         pushSymbol(78);
 
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = ExpK;
+        //现在还无法知道Exp的类型
+
+        //注意一下VariMore中弹栈操作！！！
+        TreeNode peek = nodeStack.peek();
+        //需要注意的是peek为Stmt节点，函数名所对应的表达式节点没有压进来
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
+
+        //压栈操作
+        //需要注意Exp的弹栈操作
+        nodeStack.push(treeNode);
+
+        //进行表达式节点压栈
+        expStack.push(treeNode);
+
     }
 
-    //ActParamMore ::= , ActParamList      ["COMMA"]
-    //这里需要进行弹栈
+    //ActParamMore ::= $                   ["RPAREN"]
+    //这里需要进行弹栈，似乎不需要进行双弹
     void process79() {
         pushSymbol(79);
     }
 
+    //ActParamMore ::= , ActParamList      ["COMMA"]
+    //这里需要进行弹栈
+    //现在发现这里不需要进行弹栈操作了Exp处理完后会自动弹栈，不会我也会强制他会
     void process80() {
         pushSymbol(80);
     }
 
+
+    //RelExp ::= Exp OtherRelE     ["INTC","LPAREN","ID"]
+    //在这个地方的Exp就不进行nodeStack的压栈操作了
     void process81() {
         pushSymbol(81);
+        //这里可以进行初步的设置
+        //此时的peek应该
+        expStack.peek().memberKind = AllName.memberKind.OpK;
+
+        //这里应该进行一个表达式的创建，这里先不管先进行一波表达式的创建
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = ExpK;
+        //压栈操作
+        //需要注意Exp的弹栈操作
+        nodeStack.push(treeNode);
+
+        //进行表达式节点压栈
+        expStack.push(treeNode);
+
     }
 
+    //OtherRelE ::= CmpOp Exp      ["LT","EQ"]
+    //typeStack 操作符栈
+    //很简单的一个道理，现在的右边的那个Exp还没有进行处理
+    //所以需要进行简单的压栈处理
+    //我tm终于理解了
     void process82() {
         pushSymbol(82);
+        String sem = getCurrentToken().getSem();
+        int currentPri = getCurrentPri();
+        int pri = getPri(sem);
+        while (currentPri >= pri) {
+
+        }
+
     }
 
     void process83() {

@@ -1046,6 +1046,7 @@ public class DescentMethod {
     }
 
     /**
+     * 这里之所以需要这么做是为了统一
      * @param t: 此参数传入的是StmtK节点, 在stm()处创建
      * @Description 需要next  注意此处需要创建一个表达式节点配合使用,需要对t进行具体节点的赋值,利用t进行line的赋值
      * AssignmentRest ::= VariMore := Exp       ["DOT","ASSIGN","LMIDPAREN"]
@@ -1061,7 +1062,7 @@ public class DescentMethod {
         treeNode.name.add(tempName);
         //像这种只可以为标识符类型
         treeNode.memberKind = AllName.memberKind.IdK;
-        t.idNum++;
+        treeNode.idNum++;
         //当前无法判断ExpAttr的内容所以先不进行相关设置
         t.boolChild();
         t.child.add(treeNode);
@@ -1088,7 +1089,7 @@ public class DescentMethod {
      * @param t: 此参数传入的是StmLK或者特殊StmtK节点, 在programBody()或者conditionalStm()或者while处创建
      * @Description 需要next 需要line  不管这么多了，怎么简单怎么来
      * ConditionalStm ::= IF RelExp THEN StmList ELSE StmList FI    ["IF"]
-     * TODO 错误检查 test 这里需要继续更改
+     * TODO 错误检查 test
      *
      * @Date 2022/4/18 10:41
      **/
@@ -1289,9 +1290,21 @@ public class DescentMethod {
         if (!match("LPAREN")) {
             //错误处理
         }
+        //思考了一下应该没有问题
         t.memberKind = AllName.memberKind.CallK;
-        t.boolName();
-        t.name.add(tempName);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = ExpK;
+        treeNode.lineno = t.lineno;
+        treeNode.boolName();
+        treeNode.name.add(tempName);
+        //像这种只可以为标识符类型
+        treeNode.memberKind = AllName.memberKind.IdK;
+        treeNode.idNum++;
+        //当前无法判断ExpAttr的内容所以先不进行相关设置
+        t.boolChild();
+        t.child.add(treeNode);
+        treeNode.father = t;
+
         next();
         actParamList(t);
         //错误处理
