@@ -19,6 +19,7 @@ import static Utils.AllName.NodeKind.*;
 //TODO 一个more可能有多个地方会使用到，看看前面有没有使用到
 //TODO 之前许多节点创建的时候并没有进行压栈操作
 //todo if语句和when语句可以进行适当的调整，将if语句中的then和else当成两个if语句的儿子，而不是同级别
+//todo 每个进行弹栈的地方都需要重现进行思考
 public class LL1Process {
     //表示的token序列
     List<LexToken> tokenList;
@@ -860,43 +861,158 @@ public class LL1Process {
     }
 
     //ConditionalStm ::= IF RelExp THEN StmList ELSE StmList FI    ["IF"]
+    //只要确保RelExp弹出就可以了
     void process70() {
         pushSymbol(70);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = StmtK;
+        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode.memberKind = AllName.memberKind.IfK;
+
+        TreeNode treeNode1 = new TreeNode();
+        treeNode.nodeKind = ExpK;
+        treeNode.lineno = getCurrentToken().getLineShow();
+
+        TreeNode treeNode2 = new TreeNode();
+        treeNode.nodeKind = StmtK;
+        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode.memberKind = AllName.memberKind.ThenK;
+
+        TreeNode treeNode3 = new TreeNode();
+        treeNode.nodeKind = StmtK;
+        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode.memberKind = AllName.memberKind.ElseK;
+
+        treeNode.boolChild();
+        treeNode.child.add(treeNode1);
+        treeNode.child.add(treeNode2);
+        treeNode.child.add(treeNode3);
+
+        //建立Stmt和Stml的关系 或者是Stmt和Stmt关系
+        TreeNode peek = nodeStack.peek();
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
+
+        nodeStack.push(treeNode);
+        nodeStack.push(treeNode3);
+        nodeStack.push(treeNode2);
+        nodeStack.push(treeNode1);
 
     }
 
+    //LoopStm ::= WHILE RelExp DO StmList ENDWH       ["WHILE"]
     void process71() {
         pushSymbol(71);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = StmtK;
+        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode.memberKind = AllName.memberKind.WhileK;
+
+        TreeNode treeNode1 = new TreeNode();
+        treeNode.nodeKind = ExpK;
+        treeNode.lineno = getCurrentToken().getLineShow();
+
+
+        TreeNode treeNode2 = new TreeNode();
+        treeNode.nodeKind = StmtK;
+        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode.memberKind = AllName.memberKind.DoK;
+
+        treeNode.boolChild();
+        treeNode.child.add(treeNode1);
+        treeNode.child.add(treeNode2);
+
+        //建立Stmt和Stml的关系 或者是Stmt和Stmt关系
+        TreeNode peek = nodeStack.peek();
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
+
+        nodeStack.push(treeNode);
+        nodeStack.push(treeNode2);
+        nodeStack.push(treeNode1);
     }
 
+
+    //InputStm ::= READ ( Invar )      ["READ"]
     void process72() {
         pushSymbol(72);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = StmtK;
+        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode.memberKind = AllName.memberKind.ReadK;
+
+        //建立Stmt和Stml的关系 或者是Stmt和Stmt关系
+        TreeNode peek = nodeStack.peek();
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
+
+        nodeStack.push(treeNode);
     }
 
+    //Invar ::= ID                     ["ID"]
     void process73() {
         pushSymbol(73);
+
+        TreeNode peek = nodeStack.peek();
+        peek.boolName();
+        peek.name.add(getCurrentToken().getSem());
+        peek.idNum++;
     }
 
+    //Exp 注意这玩意
+    //OutputStm ::= WRITE ( Exp )       ["WRITE"]
     void process74() {
         pushSymbol(74);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = StmtK;
+        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode.memberKind = AllName.memberKind.WriteK;
+
+        //建立Stmt和Stml的关系 或者是Stmt和Stmt关系
+        TreeNode peek = nodeStack.peek();
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
     }
 
+    //ReturnStm ::= RETURN    ["RETURN"]
     void process75() {
         pushSymbol(75);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = StmtK;
+        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode.memberKind = AllName.memberKind.ReturnK;
+
+        //建立Stmt和Stml的关系 或者是Stmt和Stmt关系
+        TreeNode peek = nodeStack.peek();
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
     }
+
 
     void process76() {
         pushSymbol(76);
     }
 
+    //CallStmRest ::= ( ActParamList )     ["LPAREN"]
     void process77() {
         pushSymbol(77);
+
     }
 
+    //ActParamList ::= $                   ["RPAREN"]
+    //这里需要进行弹栈，似乎不需要进行双弹
     void process78() {
         pushSymbol(78);
+
     }
 
+    //ActParamMore ::= , ActParamList      ["COMMA"]
+    //这里需要进行弹栈
     void process79() {
         pushSymbol(79);
     }

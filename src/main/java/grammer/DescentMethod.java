@@ -1088,7 +1088,8 @@ public class DescentMethod {
      * @param t: 此参数传入的是StmLK或者特殊StmtK节点, 在programBody()或者conditionalStm()或者while处创建
      * @Description 需要next 需要line  不管这么多了，怎么简单怎么来
      * ConditionalStm ::= IF RelExp THEN StmList ELSE StmList FI    ["IF"]
-     * TODO 错误检查 test
+     * TODO 错误检查 test 这里需要继续更改
+     *
      * @Date 2022/4/18 10:41
      **/
     void conditionalStm(TreeNode t) {
