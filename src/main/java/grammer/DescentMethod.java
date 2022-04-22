@@ -1546,11 +1546,8 @@ public class DescentMethod {
             treeNode.lineno = getCurrentToken().getLineShow();
             treeNode.setAttr("exp");
 
-            //标识符相关的处理
-            treeNode.boolName();
             String sem = getCurrentToken().getSem();
-            treeNode.name.add(sem);
-            treeNode.idNum++;
+
             int val = 0;
             try {
                 val = Integer.parseInt(sem);

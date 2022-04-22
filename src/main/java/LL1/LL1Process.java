@@ -20,6 +20,7 @@ import static Utils.AllName.NodeKind.*;
 //TODO 之前许多节点创建的时候并没有进行压栈操作
 //todo if语句和when语句可以进行适当的调整，将if语句中的then和else当成两个if语句的儿子，而不是同级别
 //todo 每个进行弹栈的地方都需要重现进行思考
+//todo 注意一下数组成员的childId
 public class LL1Process {
     //表示的token序列
     List<LexToken> tokenList;
@@ -36,7 +37,7 @@ public class LL1Process {
     //运算符栈
     Stack<TreeNode> typeStack;
 
-    //表达式节点栈
+    //表达式节点栈,或者操作数节点
     Stack<TreeNode> expStack;
 
     //LL1表
@@ -53,6 +54,12 @@ public class LL1Process {
     TreeNode ifNode;
     TreeNode whenNode;
     TreeNode tempVarNode;
+    int expFlag;
+
+    AllName.LexType getExpResult = AllName.LexType.NotBool;
+    //思考了一下觉得还是有必有的
+    AllName.LexType getExpResult1 = AllName.LexType.NotBool;
+
 
     public LL1Process(List<LexToken> tokenList) {
         this.tokenList = tokenList;
@@ -427,10 +434,15 @@ public class LL1Process {
     void process15() {
         pushSymbol(15);
         TreeNode t = nodeStack.peek();
-        t.memberKind = AllName.memberKind.IntegerK;
-        if (t.lineno != 0) {
-            t.lineno = getCurrentToken().getLineShow();
+        if (t.memberKind == AllName.memberKind.ArrayK) {
+            t.attr.arrayAttr.childType = AllName.memberKind.IntegerK;
+        } else {
+            t.memberKind = AllName.memberKind.IntegerK;
+            if (t.lineno != 0) {
+                t.lineno = getCurrentToken().getLineShow();
+            }
         }
+
     }
 
     /**
@@ -441,9 +453,13 @@ public class LL1Process {
     void process16() {
         pushSymbol(16);
         TreeNode t = nodeStack.peek();
-        t.memberKind = AllName.memberKind.CharK;
-        if (t.lineno != 0) {
-            t.lineno = getCurrentToken().getLineShow();
+        if (t.memberKind == AllName.memberKind.ArrayK) {
+            t.attr.arrayAttr.childType = AllName.memberKind.IntegerK;
+        } else {
+            t.memberKind = AllName.memberKind.CharK;
+            if (t.lineno != 0) {
+                t.lineno = getCurrentToken().getLineShow();
+            }
         }
     }
 
@@ -874,18 +890,15 @@ public class LL1Process {
 
         //进行压栈
         nodeStack.push(treeNode);
+        expStack.push(treeNode1);
         tempVarNode = treeNode1;
 
-        //进行表达式节点压栈
-        expStack.push(treeNode1);
     }
 
     //AssCall ::= AssignmentRest       ["DOT","ASSIGN","LMIDPAREN"]
     void process67() {
         pushSymbol(67);
         nodeStack.peek().memberKind = AllName.memberKind.AssignK;
-
-
     }
 
     //AssCall ::= CallStmRest          ["LPAREN"]
@@ -898,29 +911,11 @@ public class LL1Process {
     //VariMore交给了tempVar进行处理
     void process69() {
         pushSymbol(69);
-        TreeNode treeNode = new TreeNode();
-        treeNode.nodeKind = ExpK;
-        //现在还无法知道Exp的类型
-
-        //注意一下VariMore中弹栈操作！！！
-        TreeNode peek = nodeStack.peek();
-        peek.boolChild();
-        peek.child.add(treeNode);
-        treeNode.father = peek;
-
-
-        //压栈操作
-        //需要注意Exp的弹栈操作
-        nodeStack.push(treeNode);
-
-        //进行表达式节点压栈
-        expStack.push(treeNode);
-
-
     }
 
     //ConditionalStm ::= IF RelExp THEN StmList ELSE StmList FI    ["IF"]
     //只要确保RelExp弹出就可以了
+    //这个地方也是需要先进行ExpK的相关赋值
     void process70() {
         pushSymbol(70);
         TreeNode treeNode = new TreeNode();
@@ -930,6 +925,7 @@ public class LL1Process {
 
         TreeNode treeNode1 = new TreeNode();
         treeNode1.nodeKind = ExpK;
+        treeNode1.memberKind = AllName.memberKind.OpK;
 
         TreeNode treeNode2 = new TreeNode();
         treeNode2.nodeKind = StmtK;
@@ -957,11 +953,10 @@ public class LL1Process {
         nodeStack.push(treeNode2);
         nodeStack.push(treeNode1);
 
-        //进行表达式节点压栈
-        expStack.push(treeNode1);
     }
 
     //LoopStm ::= WHILE RelExp DO StmList ENDWH       ["WHILE"]
+    //这个地方是需要的
     void process71() {
         pushSymbol(71);
         TreeNode treeNode = new TreeNode();
@@ -971,6 +966,7 @@ public class LL1Process {
 
         TreeNode treeNode1 = new TreeNode();
         treeNode1.nodeKind = ExpK;
+        treeNode1.memberKind = AllName.memberKind.OpK;
 
 
         TreeNode treeNode2 = new TreeNode();
@@ -992,8 +988,6 @@ public class LL1Process {
         nodeStack.push(treeNode2);
         nodeStack.push(treeNode1);
 
-        //进行表达式节点压栈
-        expStack.push(treeNode1);
     }
 
 
@@ -1033,13 +1027,6 @@ public class LL1Process {
         treeNode.lineno = getCurrentToken().getLineShow();
         treeNode.memberKind = AllName.memberKind.WriteK;
 
-        //此处是Exp,需要进行提前压栈
-        TreeNode treeNode1 = new TreeNode();
-        treeNode1.nodeKind = ExpK;
-
-        treeNode.boolChild();
-        treeNode.child.add(treeNode1);
-
 
         //建立Stmt和Stml的关系 或者是Stmt和Stmt关系
         TreeNode peek = nodeStack.peek();
@@ -1049,10 +1036,6 @@ public class LL1Process {
 
         //压栈操作
         nodeStack.push(treeNode);
-        nodeStack.push(treeNode1);
-
-        //进行表达式节点压栈
-        expStack.push(treeNode1);
     }
 
     //ReturnStm ::= RETURN    ["RETURN"]
@@ -1085,24 +1068,6 @@ public class LL1Process {
     void process78() {
         pushSymbol(78);
 
-        TreeNode treeNode = new TreeNode();
-        treeNode.nodeKind = ExpK;
-        //现在还无法知道Exp的类型
-
-        //注意一下VariMore中弹栈操作！！！
-        TreeNode peek = nodeStack.peek();
-        //需要注意的是peek为Stmt节点，函数名所对应的表达式节点没有压进来
-        peek.boolChild();
-        peek.child.add(treeNode);
-        treeNode.father = peek;
-
-        //压栈操作
-        //需要注意Exp的弹栈操作
-        nodeStack.push(treeNode);
-
-        //进行表达式节点压栈
-        expStack.push(treeNode);
-
     }
 
     //ActParamMore ::= $                   ["RPAREN"]
@@ -1123,20 +1088,7 @@ public class LL1Process {
     //在这个地方的Exp就不进行nodeStack的压栈操作了
     void process81() {
         pushSymbol(81);
-        //这里可以进行初步的设置
-        //此时的peek应该
-        expStack.peek().memberKind = AllName.memberKind.OpK;
-
-        //这里应该进行一个表达式的创建，这里先不管先进行一波表达式的创建
-        TreeNode treeNode = new TreeNode();
-        treeNode.nodeKind = ExpK;
-        //压栈操作
-        //需要注意Exp的弹栈操作
-        nodeStack.push(treeNode);
-
-        //进行表达式节点压栈
-        expStack.push(treeNode);
-
+        getExpResult = AllName.LexType.NO;
     }
 
     //OtherRelE ::= CmpOp Exp      ["LT","EQ"]
@@ -1144,101 +1096,358 @@ public class LL1Process {
     //很简单的一个道理，现在的右边的那个Exp还没有进行处理
     //所以需要进行简单的压栈处理
     //我tm终于理解了
+    //注意后面弹栈的时候去建立关系的时候，这种关系不需要
     void process82() {
         pushSymbol(82);
-        String sem = getCurrentToken().getSem();
+        String sem = getCurrentToken().getType().toString();
         int currentPri = getCurrentPri();
         int pri = getPri(sem);
         while (currentPri >= pri) {
-
+            TreeNode p1 = expStack.pop();
+            TreeNode p2 = expStack.pop();
+            TreeNode pop = typeStack.pop();
+            pop.boolChild();
+            pop.child.add(p1);
+            pop.child.add(p2);
+            expStack.add(pop);
         }
-
+        TreeNode t = nodeStack.pop();
+        if (t.attr != null) {
+            t.setAttr("exp");
+        }
+        //设置操作符的种类
+        t.attr.expAttr.op = getCurrentToken().getType();
+        typeStack.push(t);
+        getExpResult = AllName.LexType.YES;
     }
 
+    //Term ::= Factor OtherFactor      ["INTC","LPAREN","ID"]
     void process83() {
         pushSymbol(83);
     }
 
+    //OtherFactor ::= $                ["COMMA","FI","SEMI","LT","RMIDPAREN","RPAREN","DO","EQ","MINUS","ELSE","END","THEN","ENDWH","PLUS"]
     void process84() {
         pushSymbol(84);
+        if (expFlag != 0 && match("RPAREN")) {
+            while (typeStack.peek().nodeKind != Special) {
+                TreeNode p1 = expStack.pop();
+                TreeNode p2 = expStack.pop();
+                TreeNode pop = typeStack.pop();
+                pop.boolChild();
+                pop.child.add(p1);
+                pop.child.add(p2);
+                expStack.add(pop);
+            }
+            typeStack.pop();
+            expFlag--;
+        } else if (getExpResult1 == AllName.LexType.YES) {
+            while (typeStack.peek().nodeKind != Special) {
+                TreeNode p1 = expStack.pop();
+                TreeNode p2 = expStack.pop();
+                TreeNode pop = typeStack.pop();
+                pop.boolChild();
+                pop.child.add(p1);
+                pop.child.add(p2);
+                expStack.add(pop);
+            }
+            //去除不必要
+            typeStack.pop();
+            TreeNode pop = expStack.pop();
+            TreeNode pop1 = nodeStack.pop();
+            pop1.boolChild();
+            pop1.child.add(pop);
+
+            //为了之前的那个赋值表达式
+            if (nodeStack.peek().memberKind == AllName.memberKind.IdK&&nodeStack.peek().nodeKind==ExpK){
+                nodeStack.pop();
+            }
+        } else {
+            while (!typeStack.isEmpty()) {
+                TreeNode p1 = expStack.pop();
+                TreeNode p2 = expStack.pop();
+                TreeNode pop = typeStack.pop();
+                pop.boolChild();
+                pop.child.add(p1);
+                pop.child.add(p2);
+                expStack.add(pop);
+            }
+            if (getExpResult == AllName.LexType.YES) {
+                expStack.pop();
+                //不需要进行赋值
+                getExpResult = AllName.LexType.NO;
+            } else {
+                //一般的表达式
+                TreeNode pop = expStack.pop();
+                TreeNode peek = nodeStack.peek();
+                peek.boolChild();
+                peek.child.add(pop);
+            }
+        }
     }
 
+    //OtherTerm ::= AddOp Exp      ["PLUS","MINUS"]
     void process85() {
         pushSymbol(85);
+        String sem = getCurrentToken().getType().toString();
+        int currentPri = getCurrentPri();
+        int pri = getPri(sem);
+        while (currentPri >= pri) {
+            TreeNode p1 = expStack.pop();
+            TreeNode p2 = expStack.pop();
+            TreeNode pop = typeStack.pop();
+            pop.boolChild();
+            pop.child.add(p1);
+            pop.child.add(p2);
+            expStack.add(pop);
+        }
+        TreeNode treeNode1 = new TreeNode();
+        treeNode1.nodeKind = ExpK;
+        treeNode1.memberKind = AllName.memberKind.OpK;
+        if (treeNode1.attr != null) {
+            treeNode1.setAttr("exp");
+        }
+        //设置操作符的种类
+        treeNode1.attr.expAttr.op = getCurrentToken().getType();
+        typeStack.push(treeNode1);
     }
 
+    //Term ::= Factor OtherFactor      ["INTC","LPAREN","ID"]
     void process86() {
         pushSymbol(86);
     }
 
+    //OtherFactor ::= $                ["COMMA","FI","SEMI","LT","RMIDPAREN","RPAREN","DO","EQ","MINUS","ELSE","END","THEN","ENDWH","PLUS"]
     void process87() {
         pushSymbol(87);
     }
 
+    //OtherFactor ::= MultOp Term      ["OVER","TIMES"]
     void process88() {
         pushSymbol(88);
+        String sem = getCurrentToken().getType().toString();
+        int currentPri = getCurrentPri();
+        int pri = getPri(sem);
+        while (currentPri >= pri) {
+            TreeNode p1 = expStack.pop();
+            TreeNode p2 = expStack.pop();
+            TreeNode pop = typeStack.pop();
+            pop.boolChild();
+            pop.child.add(p1);
+            pop.child.add(p2);
+            expStack.add(pop);
+        }
+        TreeNode treeNode1 = new TreeNode();
+        treeNode1.nodeKind = ExpK;
+        treeNode1.memberKind = AllName.memberKind.OpK;
+        if (treeNode1.attr != null) {
+            treeNode1.setAttr("exp");
+        }
+        //设置操作符的种类
+        treeNode1.attr.expAttr.op = getCurrentToken().getType();
+        typeStack.push(treeNode1);
     }
 
+    //Factor ::= ( Exp )       ["LPAREN"]
     void process89() {
         pushSymbol(89);
+
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = Special;
+        typeStack.push(treeNode);
     }
 
+
+    //Factor ::= INTC          ["INTC"]
     void process90() {
         pushSymbol(90);
+        TreeNode treeNode = new TreeNode();
+        treeNode.setAttr("exp");
+        treeNode.nodeKind = ExpK;
+        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode.memberKind = AllName.memberKind.ConstK;
+        String sem = getCurrentToken().getSem();
+        int val = 0;
+        try {
+            val = Integer.parseInt(sem);
+        } catch (Exception e) {
+            //错误处理
+        }
+        //表示此表达式值为Integer
+        treeNode.attr.expAttr.type = AllName.LexType.Integer;
+        treeNode.attr.expAttr.val = val;
+        expStack.push(treeNode);
     }
 
+    //Factor ::= Variable      ["ID"]
     void process91() {
         pushSymbol(91);
     }
 
+    //Variable ::= ID VariMore        ["ID"]
     void process92() {
         pushSymbol(92);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = ExpK;
+        treeNode.memberKind = AllName.memberKind.IdK;
+        treeNode.lineno = getCurrentToken().getLineShow();
+        treeNode.setAttr("exp");
+
+        //标识符相关的处理
+        treeNode.boolName();
+        String sem = getCurrentToken().getSem();
+        treeNode.name.add(sem);
+        treeNode.idNum++;
+
+        expStack.push(treeNode);
+
     }
 
+    //VariMore ::= $               ["COMMA","FI","TIMES","SEMI","LT","RMIDPAREN","RPAREN","DO","ASSIGN","EQ","MINUS","OVER","ELSE","END","THEN","ENDWH","PLUS"]
     void process93() {
         pushSymbol(93);
+        TreeNode peek = expStack.peek();
+        if (peek.attr != null) {
+            peek.setAttr("exp");
+        }
+        peek.attr.expAttr.varKind = AllName.LexType.idV;
+        //这里需要将其弹出来
+        //todo 这里可能需要更加严格的条件
+        if (nodeStack.peek().memberKind == AllName.memberKind.IdK&&nodeStack.peek().nodeKind==ExpK){
+            nodeStack.pop();
+        }
     }
 
+    //VariMore ::= [ Exp ]         ["LMIDPAREN"]
+    //感觉没有必有进行进一步的设计
+    //注意peek是本来是没有压再nodeStack的
     void process94() {
         pushSymbol(94);
+        TreeNode peek = expStack.peek();
+        if (peek.attr != null) {
+            peek.setAttr("exp");
+        }
+        peek.attr.expAttr.varKind = AllName.LexType.ArrayMembV;
+
+
+        getExpResult1 = AllName.LexType.YES;
+        //这里先将peek压下栈，为了进行树间连接
+        nodeStack.push(peek);
+
+
+        //可以去测试一下叠加中括号
+        //再次借用一下special
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = Special;
+        typeStack.push(treeNode);
     }
 
+    //VariMore ::= . FieldVar      ["DOT"]
     void process95() {
         pushSymbol(95);
+        TreeNode peek = expStack.peek();
+        if (peek.attr != null) {
+            peek.setAttr("exp");
+        }
+        peek.attr.expAttr.varKind = AllName.LexType.FieldMembV;
+
+        //这里先将peek压下栈，为了进行树间连接
+        nodeStack.push(peek);
     }
 
+
+    //FieldVar ::= ID FieldVarMore    ["ID"]
     void process96() {
         pushSymbol(96);
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = ExpK;
+        treeNode.boolName();
+        treeNode.name.add(getCurrentToken().getSem());
+
+        treeNode.name = new ArrayList<>();
+        treeNode.name.add(getCurrentToken().getSem());
+        treeNode.idNum++;
+        TreeNode peek = nodeStack.peek();
+
+        peek.boolChild();
+        peek.child.add(treeNode);
+        treeNode.father = peek;
+
+        //方便进行后续的赋值
+        nodeStack.push(treeNode);
+
     }
 
+
+    //FieldVarMore ::= $           ["COMMA","FI","TIMES","SEMI","LT","RMIDPAREN","RPAREN","DO","ASSIGN","EQ","MINUS","OVER","ELSE","END","THEN","ENDWH","PLUS"]
     void process97() {
         pushSymbol(97);
+        TreeNode pop = nodeStack.pop();
+        pop.memberKind = AllName.memberKind.IdK;
+        if (pop.attr != null) {
+            pop.setAttr("exp");
+        }
+        pop.attr.expAttr.varKind = AllName.LexType.idV;
+
+        //去除为了连接使用节点
+        nodeStack.pop();
+
     }
 
+
+    //FieldVarMore ::= [ Exp ]     ["LMIDPAREN"]
     void process98() {
         pushSymbol(98);
+
+        TreeNode peek = nodeStack.pop();
+        if (peek.attr != null) {
+            peek.setAttr("exp");
+        }
+        peek.attr.expAttr.varKind = AllName.LexType.ArrayMembV;
+
+        //去除为了连接使用节点
+        nodeStack.pop();
+
+
+        getExpResult1 = AllName.LexType.YES;
+        //这里先将peek压下栈，为了进行树间连接
+        nodeStack.push(peek);
+
+
+        //可以去测试一下叠加中括号
+        //再次借用一下special
+        TreeNode treeNode = new TreeNode();
+        treeNode.nodeKind = Special;
+        typeStack.push(treeNode);
     }
 
+
+    //CmpOp ::= <               ["LT"]
     void process99() {
         pushSymbol(99);
     }
 
+    //CmpOp ::= =               ["EQ"]
     void process100() {
         pushSymbol(100);
     }
 
+    //AddOp ::= +               ["PLUS"]
     void process101() {
         pushSymbol(101);
     }
 
+    //AddOp ::= -               ["MINUS"]
     void process102() {
         pushSymbol(102);
     }
 
+    //MultOp ::= *              ["TIMES"]
     void process103() {
         pushSymbol(103);
     }
 
+    //MultOp ::= /              ["OVER"]
     void process104() {
         pushSymbol(104);
     }
