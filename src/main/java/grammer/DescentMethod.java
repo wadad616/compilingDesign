@@ -173,10 +173,15 @@ public class DescentMethod {
         //错误处理
 
 
-        treeNode.child.add(t);
-        t.father = treeNode;
-        treeNode.child.add(v);
-        v.father = treeNode;
+        if(t.child!=null){
+            treeNode.child.add(t);
+            t.father = treeNode;
+        }
+
+        if(v.child!=null){
+            treeNode.child.add(v);
+            v.father = treeNode;
+        }
 
         procDec(treeNode);
         //综合错误处理
@@ -1624,7 +1629,7 @@ public class DescentMethod {
     void variMore(TreeNode t) {
         //注意在这种情况下就不知道类型了,需要在语义分析的时候才可以进一步的确定
         if (match(new String[]{"COMMA", "FI", "TIMES", "SEMI", "LT", "RMIDPAREN", "RPAREN", "DO", "ASSIGN", "EQ", "MINUS", "OVER", "ELSE", "END", "THEN", "ENDWH", "PLUS"})) {
-            if (t.attr != null) {
+            if (t.attr == null) {
                 t.setAttr("exp");
             }
             t.attr.expAttr.varKind = AllName.LexType.idV;
@@ -1633,7 +1638,7 @@ public class DescentMethod {
             next();
             //特殊用法
             //注意这种情况可以确定t的
-            if (t.attr != null) {
+            if (t.attr == null) {
                 t.setAttr("exp");
             }
             t.attr.expAttr.varKind = AllName.LexType.ArrayMembV;
@@ -1649,7 +1654,7 @@ public class DescentMethod {
             }
         } else if (match("DOT")) {
             next();
-            if (t.attr != null) {
+            if (t.attr == null) {
                 t.setAttr("exp");
             }
             t.attr.expAttr.varKind = AllName.LexType.FieldMembV;
@@ -1704,7 +1709,7 @@ public class DescentMethod {
      **/
     void fieldVarMore(TreeNode t) {
         if (match(new String[]{"COMMA", "FI", "TIMES", "SEMI", "LT", "RMIDPAREN", "RPAREN", "DO", "ASSIGN", "EQ", "MINUS", "OVER", "ELSE", "END", "THEN", "ENDWH", "PLUS"})) {
-            if (t.attr != null) {
+            if (t.attr == null) {
                 t.setAttr("exp");
             }
             t.attr.expAttr.varKind = AllName.LexType.idV;
@@ -1713,7 +1718,7 @@ public class DescentMethod {
             next();
             //特殊用法
             //注意这种情况可以确定t的
-            if (t.attr != null) {
+            if (t.attr == null) {
                 t.setAttr("exp");
             }
             t.attr.expAttr.varKind = AllName.LexType.ArrayMembV;
