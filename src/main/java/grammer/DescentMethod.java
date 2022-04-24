@@ -209,7 +209,7 @@ public class DescentMethod {
      **/
     void typeDeclaration(TreeNode t) {
         //只有匹配完成才可以进行match
-        if (t.lineno != 0) {
+        if (t.lineno == 0) {
             t.lineno = getCurrentToken().getLineShow();
         }
         next();
@@ -278,7 +278,7 @@ public class DescentMethod {
      **/
     void typeId(TreeNode t) {
         //因为已经进行了匹配才可以进入这里,所以忽略了匹配
-        if (t.lineno != 0)
+        if (t.lineno == 0)
             t.lineno = getCurrentToken().getLineShow();
         t.boolName();
         t.name.add(getCurrentToken().getSem());
@@ -314,7 +314,7 @@ public class DescentMethod {
                 t.typeName = new ArrayList<>();
             }
             t.typeName.add(getCurrentToken().getSem());
-            if (t.lineno != 0) {
+            if (t.lineno == 0) {
                 t.lineno = getCurrentToken().getLineShow();
             }
             next();
@@ -339,7 +339,7 @@ public class DescentMethod {
         } else if (match("CHAR")) {
             t.memberKind = AllName.memberKind.CharK;
         }
-        if (t.lineno != 0) {
+        if (t.lineno == 0) {
             t.lineno = getCurrentToken().getLineShow();
         }
         next();
@@ -377,7 +377,7 @@ public class DescentMethod {
     void arrayType(TreeNode t) {
         //数组相关信息初始化
         t.setAttr("array");
-        if (t.lineno != 0)
+        if (t.lineno == 0)
             t.lineno = getCurrentToken().getLineShow();
         if (!match("ARRAY")) {
             //错误处理
@@ -516,7 +516,7 @@ public class DescentMethod {
         if (match("ID")) {
             t.boolName();
             t.name.add(getCurrentToken().getSem());
-            if (t.lineno != 0)
+            if (t.lineno == 0)
                 t.lineno = getCurrentToken().getLineShow();
             t.idNum++;
             next();
@@ -643,7 +643,7 @@ public class DescentMethod {
             t.boolName();
             t.name.add(getCurrentToken().getSem());
             t.idNum++;
-            if (t.lineno != 0) {
+            if (t.lineno == 0) {
                 t.lineno = getCurrentToken().getLineShow();
             }
             next();
@@ -862,7 +862,7 @@ public class DescentMethod {
      **/
     void formList(TreeNode t) {
         if (match("ID")) {
-            if (t.lineno != 0) {
+            if (t.lineno == 0) {
                 t.lineno = getCurrentToken().getLineShow();
             }
             t.boolName();
