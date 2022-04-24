@@ -1133,6 +1133,7 @@ public class DescentMethod {
         if (!match("THEN")) {
             //错误处理
         }
+        next();
         TreeNode treeNode1 = new TreeNode();
         treeNode1.nodeKind = StmtK;
         treeNode1.lineno = getCurrentToken().getLineShow();
@@ -1142,11 +1143,12 @@ public class DescentMethod {
         treeNode1.father = treeNode;
         stmList(treeNode1);
         //错误处理
-        next();
+
         //ELSE后语句
         if (!match("ELSE")) {
             //错误处理
         }
+        next();
         TreeNode treeNode2 = new TreeNode();
         treeNode2.nodeKind = StmtK;
         treeNode2.lineno = getCurrentToken().getLineShow();
@@ -1156,7 +1158,7 @@ public class DescentMethod {
         treeNode2.father = treeNode;
         stmList(treeNode2);
         //错误处理
-        next();
+
 
         if (!match("FI")) {
             //错误处理
@@ -1190,6 +1192,7 @@ public class DescentMethod {
         if (!match("DoK")) {
             //错误处理
         }
+        next();
         TreeNode treeNode1 = new TreeNode();
         treeNode1.nodeKind = StmtK;
         treeNode1.lineno = getCurrentToken().getLineShow();
@@ -1199,7 +1202,7 @@ public class DescentMethod {
         treeNode1.father = treeNode;
         stmList(treeNode1);
         //错误处理
-        next();
+
 
         if (!match("ENDWH")) {
             //错误处理
