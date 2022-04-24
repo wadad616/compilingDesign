@@ -846,7 +846,7 @@ public class DescentMethod {
             formList(treeNode);
             //错误处理
         } else if (match("VAR")) {
-            if (treeNode.lineno != 0)
+            if (treeNode.lineno == 0)
                 treeNode.lineno = getCurrentToken().getLineShow();
             if (treeNode.attr == null) {
                 treeNode.setAttr("proc");
@@ -947,7 +947,7 @@ public class DescentMethod {
     TreeNode programBody() {
         TreeNode treeNode = new TreeNode();
         treeNode.nodeKind = StmLK;
-        if (treeNode.lineno != 0) {
+        if (treeNode.lineno == 0) {
             treeNode.lineno = getCurrentToken().getLineShow();
         }
         if (!match("BEGIN")) {
@@ -1241,6 +1241,7 @@ public class DescentMethod {
         if (!match("RPAREN")) {
             //错误处理
         }
+        next();
     }
 
     /**
@@ -1269,13 +1270,11 @@ public class DescentMethod {
 
         exp(treeNode);
         //错误处理
-        treeNode.boolName();
-        treeNode.name.add(getCurrentToken().getSem());
-        treeNode.idNum++;
-        next();
+
         if (!match("RPAREN")) {
             //错误处理
         }
+        next();
     }
 
     /**
