@@ -1,4 +1,4 @@
-package LL1;
+package grammer;
 
 import Utils.AllName;
 import Utils.Expression;
@@ -18,7 +18,7 @@ import static Utils.AllName.NodeKind.*;
 //往回看一下有进行树间关系连接的时候，父亲是否是父亲
 //TODO 一个more可能有多个地方会使用到，看看前面有没有使用到
 //TODO 之前许多节点创建的时候并没有进行压栈操作
-//todo if语句和when语句可以进行适当的调整，将if语句中的then和else当成两个if语句的儿子，而不是同级别
+//已经完成 todo if语句和when语句可以进行适当的调整，将if语句中的then和else当成两个if语句的儿子，而不是同级别
 //todo 每个进行弹栈的地方都需要重现进行思考
 //todo 注意一下数组成员的childId
 public class LL1Process {

@@ -106,4 +106,17 @@ public class TreeNode {
         }
     }
 
+    @Override
+    public String toString() {
+        return "TreeNode{" +
+                "lineno=" + lineno +
+                ", nodeKind=" + nodeKind +
+                ", memberKind=" + memberKind +
+                ", idNum=" + idNum +
+                ", name=" + name +
+                ", table=" + table +
+                ", typeName=" + typeName +
+                ", attr=" + attr +
+                '}';
+    }
 }

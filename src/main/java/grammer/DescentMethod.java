@@ -18,6 +18,8 @@ import static Utils.AllName.NodeKind.*;
 //我觉得不能这样  调用语句有标识符，不同于一般赋值语句 左式的标识符也是表达式
 //找一下警告中的used 判断一下程序中的错误
 //type 和 var 处有点问题 可能没有type 和var！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+
+
 public class DescentMethod {
     //表示的token序列
     List<LexToken> tokenList;
@@ -26,6 +28,7 @@ public class DescentMethod {
 
     //标识临时变量
     String tempName;
+    TreeNode root;
 
     public DescentMethod(List<LexToken> tokenList) {
         this.tokenList = tokenList;
@@ -82,26 +85,31 @@ public class DescentMethod {
      * @Date 2022/4/17 10:52
      **/
 
-    TreeNode program() {
-        TreeNode t1 = programHead();
-        TreeNode t2 = declarePart();
-        TreeNode t3 = programBody();
-        TreeNode root = new TreeNode();
+    public TreeNode program() {
+        root = new TreeNode();
         root.nodeKind = AllName.NodeKind.ProK;
         root.child = new ArrayList<>();
-        //需要加上错误处理
+
+        TreeNode t1 = programHead();
         if (t1 != null) {
             t1.father = root;
             root.child.add(t1);
         }
+        //
+
+        TreeNode t2 = declarePart();
         if (t2 != null) {
             t2.father = root;
             root.child.add(t2);
         }
+
+        TreeNode t3 = programBody();
         if (t3 != null) {
             t3.father = root;
             root.child.add(t3);
         }
+
+        //需要加上错误处理
         if (match("DOT")) {
 
         }
@@ -223,6 +231,8 @@ public class DescentMethod {
         treeNode.nodeKind = AllName.NodeKind.DecK;
         typeId(treeNode);
         //进行树中节点的连接
+
+        t.boolChild();
         t.child.add(treeNode);
         treeNode.father = t;
         if (match("EQ")) {
@@ -1116,10 +1126,10 @@ public class DescentMethod {
         treeNode1.nodeKind = StmtK;
         treeNode1.lineno = getCurrentToken().getLineShow();
         treeNode1.memberKind = AllName.memberKind.ThenK;
-        t.boolChild();
-        t.child.add(treeNode1);
-        treeNode1.father = t;
-        stmList(t);
+        treeNode.boolChild();
+        treeNode.child.add(treeNode1);
+        treeNode1.father = treeNode;
+        stmList(treeNode1);
         //错误处理
         next();
         //ELSE后语句
@@ -1130,10 +1140,10 @@ public class DescentMethod {
         treeNode2.nodeKind = StmtK;
         treeNode2.lineno = getCurrentToken().getLineShow();
         treeNode2.memberKind = AllName.memberKind.ElseK;
-        t.boolChild();
-        t.child.add(treeNode2);
-        treeNode2.father = t;
-        stmList(t);
+        treeNode.boolChild();
+        treeNode.child.add(treeNode2);
+        treeNode2.father = treeNode;
+        stmList(treeNode2);
         //错误处理
         next();
 
@@ -1173,10 +1183,10 @@ public class DescentMethod {
         treeNode1.nodeKind = StmtK;
         treeNode1.lineno = getCurrentToken().getLineShow();
         treeNode1.memberKind = AllName.memberKind.DoK;
-        t.boolChild();
-        t.child.add(treeNode1);
-        treeNode1.father = t;
-        stmList(t);
+        treeNode.boolChild();
+        treeNode.child.add(treeNode1);
+        treeNode1.father = treeNode;
+        stmList(treeNode1);
         //错误处理
         next();
 
@@ -1405,8 +1415,9 @@ public class DescentMethod {
             TreeNode t2 = simpleExp();
             //错误处理
 
-            treeNode.child.add(t1);
-            t1.father = treeNode;
+            treeNode.child.add(t2);
+            t2.father = treeNode;
+
             ret = treeNode;
         }
         return ret;
