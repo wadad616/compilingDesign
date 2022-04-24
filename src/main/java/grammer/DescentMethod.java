@@ -1018,13 +1018,14 @@ public class DescentMethod {
             loopStm(t);
             //错误处理
         } else if (match("READ")) {
-            returnStm(t);
-            //错误处理
-        } else if (match("WRITE")) {
             inputStm(t);
             //错误处理
-        } else if (match("RETURN")) {
+        } else if (match("WRITE")) {
             outputStm(t);
+            //错误处理
+        } else if (match("RETURN")) {
+
+            returnStm(t);
             //错误处理
         } else if (match("ID")) {
             TreeNode treeNode = new TreeNode();
@@ -1266,8 +1267,9 @@ public class DescentMethod {
         }
         next();
 
-        exp(t);
+        exp(treeNode);
         //错误处理
+        treeNode.boolName();
         treeNode.name.add(getCurrentToken().getSem());
         treeNode.idNum++;
         next();
@@ -1405,12 +1407,6 @@ public class DescentMethod {
             treeNode.attr.expAttr.type = AllName.LexType.Boolean;
             //建立父子树关系
 
-            //只有最开始的表达式需要这样
-            if (t != null) {
-                treeNode.father = t;
-                t.boolChild();
-                t.child.add(treeNode);
-            }
             //建立父子树关系
             treeNode.boolChild();
             treeNode.child.add(t1);
@@ -1429,6 +1425,12 @@ public class DescentMethod {
             t2.father = treeNode;
 
             ret = treeNode;
+        }
+        //只有最开始的表达式需要这样
+        if (t != null) {
+            ret.father = t;
+            t.boolChild();
+            t.child.add(ret);
         }
         return ret;
     }
