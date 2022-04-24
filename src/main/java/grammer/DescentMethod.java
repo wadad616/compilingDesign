@@ -1325,6 +1325,10 @@ public class DescentMethod {
         treeNode.memberKind = AllName.memberKind.IdK;
         treeNode.idNum++;
         //当前无法判断ExpAttr的内容所以先不进行相关设置
+        if(treeNode.attr==null){
+            treeNode.setAttr("exp");
+        }
+        treeNode.attr.expAttr.type= AllName.LexType.Void;
         t.boolChild();
         t.child.add(treeNode);
         treeNode.father = t;
