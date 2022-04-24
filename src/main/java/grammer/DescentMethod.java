@@ -44,6 +44,9 @@ public class DescentMethod {
 
     //进行匹配
     boolean match(String s) {
+        if(tokenIndex==tokenList.size()){
+            return false;
+        }
         return s.equals(tokenList.get(tokenIndex).getType().toString());
     }
 
@@ -110,9 +113,10 @@ public class DescentMethod {
         }
 
         //需要加上错误处理
-        if (match("DOT")) {
-
+        if (!match("DOT")) {
+            //错误处理
         }
+        next();
         return root;
     }
 
