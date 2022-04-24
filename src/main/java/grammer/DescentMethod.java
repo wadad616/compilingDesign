@@ -716,7 +716,7 @@ public class DescentMethod {
             treeNode.boolName();
             treeNode.name.add(getCurrentToken().getSem());
             treeNode.idNum++;
-            next();
+
         } else {
             //错误处理
         }

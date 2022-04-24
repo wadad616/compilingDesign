@@ -41,7 +41,7 @@ public class TreeNode {
     }
 
     public void setAttr(String type) {
-        new Attr(type);
+        attr=new Attr(type);
     }
 
     public class Attr {
