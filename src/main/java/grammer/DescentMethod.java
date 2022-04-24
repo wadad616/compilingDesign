@@ -733,6 +733,10 @@ public class DescentMethod {
         }
         next();
         //传参设置节点的父子关系
+        if (!match("SEMI")) {
+            //错误处理
+        }
+        next();
         procDecPart(treeNode);
         //传参设置父子关系
         procBody(treeNode);
