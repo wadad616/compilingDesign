@@ -167,7 +167,7 @@ public class DescentMethod {
         //varK
         TreeNode v = new TreeNode();
         treeNode.boolChild();
-        t.nodeKind = AllName.NodeKind.VarK;
+        v.nodeKind = AllName.NodeKind.VarK;
         //没有条件
         varDec(v);
         //错误处理
@@ -180,6 +180,7 @@ public class DescentMethod {
 
         procDec(treeNode);
         //综合错误处理
+
         return treeNode;
     }
 
