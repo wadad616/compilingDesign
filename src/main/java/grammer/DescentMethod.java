@@ -1329,6 +1329,7 @@ public class DescentMethod {
             treeNode.setAttr("exp");
         }
         treeNode.attr.expAttr.type= AllName.LexType.Void;
+        treeNode.attr.expAttr.varKind= AllName.LexType.idV;
         t.boolChild();
         t.child.add(treeNode);
         treeNode.father = t;
@@ -1339,6 +1340,7 @@ public class DescentMethod {
         if (!match("RPAREN")) {
             //错误处理
         }
+        next();
     }
 
     /**
