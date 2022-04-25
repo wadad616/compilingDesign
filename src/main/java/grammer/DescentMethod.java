@@ -44,7 +44,7 @@ public class DescentMethod {
 
     //进行匹配
     boolean match(String s) {
-        if(tokenIndex==tokenList.size()){
+        if (tokenIndex == tokenList.size()) {
             return false;
         }
         return s.equals(tokenList.get(tokenIndex).getType().toString());
@@ -177,12 +177,12 @@ public class DescentMethod {
         //错误处理
 
 
-        if(t.child!=null){
+        if (t.child != null) {
             treeNode.child.add(t);
             t.father = treeNode;
         }
 
-        if(v.child!=null){
+        if (v.child != null) {
             treeNode.child.add(v);
             v.father = treeNode;
         }
@@ -1072,6 +1072,7 @@ public class DescentMethod {
 
     /**
      * 这里之所以需要这么做是为了统一
+     *
      * @param t: 此参数传入的是StmtK节点, 在stm()处创建
      * @Description 需要next  注意此处需要创建一个表达式节点配合使用,需要对t进行具体节点的赋值,利用t进行line的赋值
      * AssignmentRest ::= VariMore := Exp       ["DOT","ASSIGN","LMIDPAREN"]
@@ -1115,7 +1116,6 @@ public class DescentMethod {
      * @Description 需要next 需要line  不管这么多了，怎么简单怎么来
      * ConditionalStm ::= IF RelExp THEN StmList ELSE StmList FI    ["IF"]
      * TODO 错误检查 test
-     *
      * @Date 2022/4/18 10:41
      **/
     void conditionalStm(TreeNode t) {
@@ -1329,11 +1329,11 @@ public class DescentMethod {
         treeNode.memberKind = AllName.memberKind.IdK;
         treeNode.idNum++;
         //当前无法判断ExpAttr的内容所以先不进行相关设置
-        if(treeNode.attr==null){
+        if (treeNode.attr == null) {
             treeNode.setAttr("exp");
         }
-        treeNode.attr.expAttr.type= AllName.LexType.Void;
-        treeNode.attr.expAttr.varKind= AllName.LexType.idV;
+        treeNode.attr.expAttr.type = AllName.LexType.Void;
+        treeNode.attr.expAttr.varKind = AllName.LexType.idV;
         t.boolChild();
         t.child.add(treeNode);
         treeNode.father = t;

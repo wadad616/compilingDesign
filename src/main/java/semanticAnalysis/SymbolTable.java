@@ -11,8 +11,9 @@ import static semanticAnalysis.TypeDetails.charPtr;
 import static semanticAnalysis.TypeDetails.intPtr;
 
 //todo record中可以有数组,需要去测试一下
-
-
+//todo 出现大问题，现在是同级别的问题
+//todo 找到解决方法了，但是
+//todo 先写删除法吧。
 public class SymbolTable {
     List<Map<String, SymbolAttribute>> symbolTables;
     int size = 0;
@@ -119,7 +120,7 @@ public class SymbolTable {
                 typeDetails.arrayAttr.elemTy = charTy;
             }
             if (arrayAttr.low > arrayAttr.up) {
-                MyError error = new MyError();
+                error = new MyError();
                 error.line = t.lineno;
                 error.errorType = 2;
                 return;
@@ -131,16 +132,14 @@ public class SymbolTable {
             typeDetails.size = arrayAttr.up - arrayAttr.low + 1;
             symbolAttribute.typePtr = typeDetails;
         } else if (t.memberKind == AllName.memberKind.RecordK) {
-
             TypeDetails typeDetails = new TypeDetails();
-            typeDetails.size = t.child.size();
-            typeDetails.kind = recordTy;
             typeDetails.body = new ArrayList<>();
-            int off = 0;
+            typeDetails.kind = recordTy;
             Set<String> jud = new HashSet<>();
+            int off = 0;
             for (TreeNode t1 : t.child) {
                 if (jud.contains(t1.name.get(0))) {
-                    MyError error = new MyError();
+                    error = new MyError();
                     error.errorType = 3;
                     error.line = t1.getLineno();
                     return;
@@ -151,13 +150,39 @@ public class SymbolTable {
                     symbolAttribute1.name = t1.name.get(0);
                     symbolAttribute1.typePtr = intPtr;
                     symbolAttribute1.varAttr.off = off;
+                    off++;
                 } else if (t1.memberKind == AllName.memberKind.CharK) {
                     symbolAttribute1.name = t1.name.get(0);
                     symbolAttribute1.typePtr = charPtr;
                     symbolAttribute1.varAttr.off = off;
+                    off++;
+                } else if (t1.memberKind == AllName.memberKind.ArrayK) {
+                    symbolAttribute1.name = t1.name.get(0);
+                    TypeDetails typeDetails1 = new TypeDetails("array");
+                    symbolAttribute1.typePtr = typeDetails1;
+                    symbolAttribute1.varAttr.off = off;
+
+                    TreeNode.ArrayAttr arrayAttr = t1.attr.arrayAttr;
+                    if (arrayAttr.low > arrayAttr.up) {
+                        error = new MyError();
+                        error.line = t.lineno;
+                        error.errorType = 2;
+                        return;
+                    }
+                    if (arrayAttr.childType == AllName.memberKind.IntegerK) {
+                        typeDetails1.arrayAttr.elemTy = intTy;
+                    } else {
+                        typeDetails1.arrayAttr.elemTy = charTy;
+                    }
+                    typeDetails1.kind = arrayTy;
+                    typeDetails1.arrayAttr.low = arrayAttr.low;
+                    typeDetails1.arrayAttr.top = arrayAttr.up;
+                    typeDetails1.size = arrayAttr.up - arrayAttr.low + 1;
+                    off += typeDetails1.size;
                 }
-                off++;
+                typeDetails.body.add(symbolAttribute1);
             }
+            typeDetails.size = off;
             symbolAttribute.typePtr = typeDetails;
         }
         symbolTable.put(s, symbolAttribute);
@@ -213,14 +238,13 @@ public class SymbolTable {
 
         } else if (t.memberKind == AllName.memberKind.RecordK) {
             TypeDetails typeDetails = new TypeDetails();
-            typeDetails.size = t.child.size();
-            typeDetails.kind = recordTy;
             typeDetails.body = new ArrayList<>();
+            typeDetails.kind = recordTy;
             Set<String> jud = new HashSet<>();
             int off = 0;
             for (TreeNode t1 : t.child) {
                 if (jud.contains(t1.name.get(0))) {
-                    MyError error = new MyError();
+                    error = new MyError();
                     error.errorType = 3;
                     error.line = t1.getLineno();
                     return;
@@ -245,7 +269,7 @@ public class SymbolTable {
 
                     TreeNode.ArrayAttr arrayAttr = t1.attr.arrayAttr;
                     if (arrayAttr.low > arrayAttr.up) {
-                        MyError error = new MyError();
+                        error = new MyError();
                         error.line = t.lineno;
                         error.errorType = 2;
                         return;
@@ -259,10 +283,11 @@ public class SymbolTable {
                     typeDetails1.arrayAttr.low = arrayAttr.low;
                     typeDetails1.arrayAttr.top = arrayAttr.up;
                     typeDetails1.size = arrayAttr.up - arrayAttr.low + 1;
-                    off+=typeDetails1.size;
+                    off += typeDetails1.size;
                 }
-
+                typeDetails.body.add(symbolAttribute1);
             }
+            typeDetails.size = off;
             symbolAttribute.typePtr = typeDetails;
 
 
@@ -273,10 +298,11 @@ public class SymbolTable {
 
         } else if (t.memberKind == AllName.memberKind.IdK) {
             SymbolAttribute symbolAttribute1 = symbolTable.get(t.name.get(0));
-            if (symbolAttribute1.kind != typeKind || symbolAttribute1 == null) {
-                MyError myError = new MyError();
-                myError.line = t.lineno;
-                myError.errorType = 1;
+            if (symbolAttribute1 == null || symbolAttribute1.kind != typeKind) {
+                error = new MyError();
+                error.line = t.lineno;
+                error.errorType = 1;
+                return;
             } else {
                 symbolAttribute.typePtr = symbolAttribute1.typePtr;
                 if (symbolAttribute1.typePtr == intPtr || symbolAttribute1.typePtr == charPtr) {
@@ -334,7 +360,8 @@ public class SymbolTable {
             }
             if (t.nodeKind == AllName.NodeKind.DecK) {
                 traverseVarK(t);
-                proc.procAttr.param.add(t.name.get(0));
+                SymbolAttribute symbolAttribute = getSymbolAttribute(t.name.get(0));
+                proc.procAttr.param.add(symbolAttribute.typePtr.kind);
             } else {
                 another = t;
                 break;
@@ -400,6 +427,11 @@ public class SymbolTable {
             traverseCall(t);
         } else if (t.memberKind == AllName.memberKind.ReturnK) {
             traverseReturn(t);
+        } else {
+            //遍历
+            for (TreeNode t1 : t.child) {
+                traverseBody(t1);
+            }
         }
     }
 
@@ -412,6 +444,10 @@ public class SymbolTable {
         TreeNode treeNode = t.child.get(0);
         AllName.Types types = processExp(treeNode);
         if (types != boolTy) {
+            error = new MyError();
+            error.errorType = 11;
+            error.line = t.lineno;
+            return;
             //错误处理
         }
         TreeNode treeNode1 = t.child.get(1);
@@ -420,7 +456,7 @@ public class SymbolTable {
             return;
         }
         TreeNode treeNode2 = t.child.get(2);
-        traverseBody(treeNode1);
+        traverseBody(treeNode2);
         if (error != null) {
             return;
         }
@@ -428,27 +464,123 @@ public class SymbolTable {
     }
 
     void traverseWhile(TreeNode t) {
-
+        if (error != null) {
+            return;
+        }
+        //Exp
+        TreeNode treeNode = t.child.get(0);
+        AllName.Types types = processExp(treeNode);
+        if (types != boolTy) {
+            error = new MyError();
+            error.errorType = 11;
+            error.line = t.lineno;
+            return;
+            //错误处理
+        }
+        //when的处理
+        TreeNode treeNode1 = t.child.get(1);
+        traverseBody(treeNode1);
+        if (error != null) {
+            return;
+        }
     }
 
     void traverseAssign(TreeNode t) {
-
+        if (error != null) {
+            return;
+        }
+        TreeNode treeNode = t.child.get(0);
+        AllName.Types types = processExp(treeNode);
+        if (error != null) {
+            return;
+        }
+        TreeNode treeNode1 = t.child.get(1);
+        AllName.Types types1 = processExp(treeNode1);
+        if (error != null) {
+            return;
+        }
+        if (types != types1) {
+            error = new MyError();
+            error.errorType = 12;
+            error.line = t.lineno;
+        }
     }
 
     void traverseRead(TreeNode t) {
-
+        SymbolAttribute symbolAttribute = getSymbolAttribute(t.name.get(0));
+        if (symbolAttribute == null) {
+            error = new MyError();
+            error.errorType = 1;
+            error.line = t.lineno;
+            return;
+        }
+        if (symbolAttribute.kind != typeKind) {
+            error = new MyError();
+            error.errorType = 13;
+            error.line = t.lineno;
+        }
     }
 
     void traverseWrite(TreeNode t) {
-
+        TreeNode treeNode = t.child.get(0);
+        AllName.Types types = processExp(treeNode);
+        if (error != null) {
+            return;
+        }
+        if (types == boolTy) {
+            error = new MyError();
+            error.errorType = 14;
+            error.line = treeNode.lineno;
+        }
     }
 
     void traverseCall(TreeNode t) {
-
+        TreeNode treeNode = t.child.get(0);
+        //函数名
+        SymbolAttribute symbolAttribute = getSymbolAttribute(treeNode.name.get(0));
+        if (symbolAttribute == null) {
+            error = new MyError();
+            error.errorType = 1;
+            error.line = treeNode.lineno;
+            return;
+        }
+        if (symbolAttribute.kind != procKind) {
+            error = new MyError();
+            error.errorType = 15;
+            error.line = treeNode.lineno;
+            return;
+        }
+        List<AllName.Types> param = symbolAttribute.procAttr.param;
+        if (param.size() != t.child.size() - 1) {
+            error = new MyError();
+            error.errorType = 16;
+            error.line = treeNode.lineno;
+            return;
+        }
+        for (int i = 1; i < t.child.size(); i++) {
+            TreeNode treeNode1 = t.child.get(0);
+            SymbolAttribute symbolAttribute1 = getSymbolAttribute(treeNode1.name.get(0));
+            if (symbolAttribute1 == null) {
+                error = new MyError();
+                error.errorType = 17;
+                error.line = treeNode1.lineno;
+                return;
+            }
+            if (symbolAttribute1.typePtr.kind != param.get(i - 1)) {
+                error = new MyError();
+                error.errorType = 18;
+                error.line = treeNode1.lineno;
+                return;
+            }
+        }
     }
 
     void traverseReturn(TreeNode t) {
-
+        TreeNode treeNode = t.child.get(0);
+        AllName.Types types = processExp(treeNode);
+        if (error != null) {
+            return;
+        }
     }
 
 
@@ -459,7 +591,7 @@ public class SymbolTable {
             return TypesDefault;
         }
         switch (t.memberKind) {
-            case OpK: {
+            case OpK -> {
                 TreeNode t1 = t.child.get(0);
                 AllName.Types types = processExp(t1);
                 if (error != null) {
@@ -475,33 +607,39 @@ public class SymbolTable {
                 if (types == types1) {
                     return boolTy;
                 } else {
-                    MyError error = new MyError();
+                    error = new MyError();
                     error.errorType = 4;
                     error.line = t.lineno;
                     return TypesDefault;
                 }
             }
-            break;
-            case IdK: {
+            case IdK -> {
+                //todo 这里需要进行大量的补充
+                SymbolAttribute symbolAttribute = getSymbolAttribute(t.name.get(0));
+                //首先确保这是存在的
+                if (symbolAttribute == null) {
+                    error = new MyError();
+                    error.line = t.getLineno();
+                    error.errorType = 1;
+                    return TypesDefault;
+                }
+                //再确保这是一个变量
+                if (symbolAttribute.kind == typeKind) {
+                    error = new MyError();
+                    error.line = t.getLineno();
+                    error.errorType = 5;
+                    return TypesDefault;
+                }
                 if (t.attr.expAttr.varKind == AllName.LexType.idV) {
-                    String s = t.name.get(0);
-                    //写完了 todo 这里需要写一个获取标识符的函数
-                    SymbolAttribute symbolAttribute = getSymbolAttribute(s);
-                    if (symbolAttribute == null) {
-                        MyError error = new MyError();
-                        error.line = t.getLineno();
-                        error.errorType = 1;
-                        return TypesDefault;
-                    }
-                    if (symbolAttribute.kind == typeKind) {
-                        MyError error = new MyError();
-                        error.line = t.getLineno();
-                        error.errorType = 5;
-                        return TypesDefault;
-                    }
                     return symbolAttribute.typePtr.kind;
-
                 } else if (t.attr.expAttr.varKind == AllName.LexType.ArrayMembV) {
+                    //这里先要确保这是一个数组
+                    if (symbolAttribute.typePtr.kind != arrayTy) {
+                        error = new MyError();
+                        error.line = t.getLineno();
+                        error.errorType = 7;
+                        return TypesDefault;
+                    }
                     //这里也需要一个递归
                     TreeNode tNow = t.child.get(0);
                     AllName.Types types = processExp(tNow);
@@ -509,10 +647,19 @@ public class SymbolTable {
                         return TypesDefault;
                     }
                     if (types != intTy) {
-                        MyError error = new MyError();
-                        error.line = t.getLineno();
+                        error = new MyError();
+                        error.line = tNow.getLineno();
                         error.errorType = 6;
                         return TypesDefault;
+                    }
+                    if (tNow.memberKind == AllName.memberKind.ConstK) {
+                        int val = tNow.attr.expAttr.val;
+                        if (val > symbolAttribute.typePtr.arrayAttr.top || val < symbolAttribute.typePtr.arrayAttr.low) {
+                            error = new MyError();
+                            error.line = tNow.getLineno();
+                            error.errorType = 9;
+                            return TypesDefault;
+                        }
                     }
                     if (t.attr.arrayAttr.childType == AllName.memberKind.IntegerK) {
                         return intTy;
@@ -521,15 +668,75 @@ public class SymbolTable {
                     }
 
                 } else if (t.attr.expAttr.varKind == AllName.LexType.FieldMembV) {
-                    //这里需要一个递归
+                    //首先确保这是一个记录
+                    if (symbolAttribute.typePtr.kind != recordTy) {
+                        error = new MyError();
+                        error.line = t.getLineno();
+                        error.errorType = 8;
+                        return TypesDefault;
+                    }
+                    //先判断是否是自己的变量
                     TreeNode t1 = t.child.get(0);
+                    String s1 = t1.name.get(0);
+                    List<SymbolAttribute> body = symbolAttribute.typePtr.body;
+                    SymbolAttribute cur = null;
+                    for (SymbolAttribute symbolAttribute1 : body) {
+                        if (s1.equals(symbolAttribute1.name)) {
+                            cur = symbolAttribute1;
+                            break;
+                        }
+                    }
+                    if (cur == null) {
+                        error = new MyError();
+                        error.line = t1.getLineno();
+                        error.errorType = 10;
+                        return TypesDefault;
+                    }
+                    //这里需要一个递归
+                    if (t1.attr.expAttr.varKind == AllName.LexType.idV) {
+                        return symbolAttribute.typePtr.kind;
+                    } else {
+                        //确保是数组
+                        if (symbolAttribute.typePtr.kind != arrayTy) {
+                            error = new MyError();
+                            error.line = t1.getLineno();
+                            error.errorType = 8;
+                            return TypesDefault;
+                        }
 
+                        TreeNode tNow = t1.child.get(0);
+                        AllName.Types types = processExp(tNow);
+                        if (error != null) {
+                            return TypesDefault;
+                        }
+                        if (types != intTy) {
+                            error = new MyError();
+                            error.line = tNow.getLineno();
+                            error.errorType = 6;
+                            return TypesDefault;
+                        }
+                        if (tNow.memberKind == AllName.memberKind.ConstK) {
+                            int val = tNow.attr.expAttr.val;
+                            if (val > symbolAttribute.typePtr.arrayAttr.top || val < symbolAttribute.typePtr.arrayAttr.low) {
+                                error = new MyError();
+                                error.line = tNow.getLineno();
+                                error.errorType = 9;
+                                return TypesDefault;
+                            }
+                        }
+                        if (t1.attr.arrayAttr.childType == AllName.memberKind.IntegerK) {
+                            return intTy;
+                        } else {
+                            return charTy;
+                        }
+                    }
+
+                    //再去判断别的东西
 
                 }
 
             }
-            break;
-            case ConstK: {
+            case ConstK -> {
                 if (t.attr.expAttr.type == AllName.LexType.Integer) {
                     return intTy;
                 } else {
@@ -537,15 +744,14 @@ public class SymbolTable {
                     return charTy;
                 }
             }
-            break;
-            default: {
-                MyError error = new MyError();
+            default -> {
+                error = new MyError();
                 error.line = t.lineno;
                 error.errorType = -1;
                 return TypesDefault;
             }
         }
-
+        return TypesDefault;
     }
 
 }
