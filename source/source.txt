@@ -1,0 +1,32 @@
+program p
+type
+    t1 = integer;
+    typeRec=record
+    integer tr1;
+    end;
+
+var
+
+    t1 test1;
+    record
+    integer vr1;
+    end varRec;
+    integer v1,v2;
+    array [1..20]of integer xx;
+
+procedure q(integer i);
+var integer a;
+
+begin
+    a:=i;
+    write(a)
+end
+
+begin
+read(vl);
+if v1<10
+then v1:=v1+10
+else v1:=v1-10
+fi;
+q(v1)
+end.

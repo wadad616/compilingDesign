@@ -1,0 +1,10 @@
+typeRec=SymbolAttribute(typePtr=TypeDetails(size=20, kind=arrayTy, body=null, arrayAttr=TypeDetails.ArrayAttr(elemTy=intTy, low=1, top=20)), kind=typeKind, name=typeRec, varAttr=null, procAttr=null)
+q=SymbolAttribute(typePtr=null, kind=procKind, name=q, varAttr=null, procAttr=SymbolAttribute.ProcAttr(level=0, param=[intTy], code=0, size=0))
+test2=SymbolAttribute(typePtr=TypeDetails(size=20, kind=arrayTy, body=null, arrayAttr=TypeDetails.ArrayAttr(elemTy=intTy, low=1, top=20)), kind=varKind, name=test2, varAttr=SymbolAttribute.VarAttr(access=false, level=0, off=20), procAttr=null)
+test3=SymbolAttribute(typePtr=TypeDetails(size=1, kind=charTy, body=null, arrayAttr=null), kind=varKind, name=test3, varAttr=SymbolAttribute.VarAttr(access=true, level=0, off=40), procAttr=null)
+t=SymbolAttribute(typePtr=TypeDetails(size=1, kind=charTy, body=null, arrayAttr=null), kind=typeKind, name=t, varAttr=null, procAttr=null)
+test1=SymbolAttribute(typePtr=TypeDetails(size=20, kind=arrayTy, body=null, arrayAttr=TypeDetails.ArrayAttr(elemTy=intTy, low=1, top=20)), kind=varKind, name=test1, varAttr=SymbolAttribute.VarAttr(access=false, level=0, off=0), procAttr=null)
+===================================
+a=SymbolAttribute(typePtr=TypeDetails(size=1, kind=intTy, body=null, arrayAttr=null), kind=varKind, name=a, varAttr=SymbolAttribute.VarAttr(access=true, level=1, off=1), procAttr=null)
+i=SymbolAttribute(typePtr=TypeDetails(size=1, kind=intTy, body=null, arrayAttr=null), kind=varKind, name=i, varAttr=SymbolAttribute.VarAttr(access=true, level=1, off=0), procAttr=null)
+null

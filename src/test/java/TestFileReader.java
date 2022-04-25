@@ -194,7 +194,7 @@ public class TestFileReader {
     @Test
     public void makeFunction() throws FileNotFoundException {
         Scanner scanner;
-        scanner = new Scanner(new FileInputStream("草稿.txt"));
+        scanner = new Scanner(new FileInputStream("1.txt"));
         List<String> list = new ArrayList<>();
         while (scanner.hasNextLine()) {
             String s = scanner.nextLine();

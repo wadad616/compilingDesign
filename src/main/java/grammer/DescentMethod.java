@@ -484,7 +484,9 @@ public class DescentMethod {
 
         } else if (match("ARRAY")) {
             arrayType(treeNode);
-
+            //错误处理
+            idList(treeNode);
+            //错误处理
         } else {
             //错误处理
         }

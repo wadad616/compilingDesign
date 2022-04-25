@@ -1,11 +1,11 @@
 program p
-type t1 = integer;
+type
+    t = char;
+    typeRec = array [101..20]of integer;
+
 var
-    record
-    integer r1,r2;
-    end rec;
-    integer v1,v2;
-    array [1..20]of integer xx;
+    typeRec test1,test2;
+    char test3;
 
 procedure q(integer i);
 var integer a;

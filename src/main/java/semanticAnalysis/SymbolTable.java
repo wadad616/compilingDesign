@@ -144,7 +144,7 @@ public class SymbolTable {
                     error.line = t1.getLineno();
                     return;
                 }
-                jud.add(t1.name.get(0));
+
                 SymbolAttribute symbolAttribute1 = new SymbolAttribute("var");
                 if (t1.memberKind == AllName.memberKind.IntegerK) {
                     symbolAttribute1.name = t1.name.get(0);
@@ -183,6 +183,13 @@ public class SymbolTable {
                 off -= symbolAttribute1.typePtr.size;
                 //逗号引起的惨案
                 for (String s1 : t1.name) {
+                    if (jud.contains(s1)) {
+                        error = new MyError();
+                        error.errorType = 3;
+                        error.line = t1.getLineno();
+                        return;
+                    }
+                    jud.add(s1);
                     SymbolAttribute symbolAttribute2 = new SymbolAttribute(symbolAttribute1);
                     symbolAttribute2.name = s1;
                     symbolAttribute2.varAttr.off = off;
@@ -200,6 +207,9 @@ public class SymbolTable {
     void traverseVarK(TreeNode t) {
         createCurrentTable();
         String s = t.name.get(0);
+        if (t.memberKind == AllName.memberKind.IdK) {
+            s = t.name.get(1);
+        }
         Map<String, SymbolAttribute> symbolTable = getSymbolTable(currentLeve);
         SymbolAttribute symbolAttribute = new SymbolAttribute("var");
         symbolAttribute.kind = varKind;
@@ -257,7 +267,7 @@ public class SymbolTable {
                     error.line = t1.getLineno();
                     return;
                 }
-                jud.add(t1.name.get(0));
+
                 SymbolAttribute symbolAttribute1 = new SymbolAttribute("var");
                 if (t1.memberKind == AllName.memberKind.IntegerK) {
                     symbolAttribute1.name = t1.name.get(0);
@@ -296,6 +306,13 @@ public class SymbolTable {
                 off -= symbolAttribute1.typePtr.size;
                 //逗号引起的惨案
                 for (String s1 : t1.name) {
+                    if (jud.contains(s1)) {
+                        error = new MyError();
+                        error.errorType = 3;
+                        error.line = t1.getLineno();
+                        return;
+                    }
+                    jud.add(s1);
                     SymbolAttribute symbolAttribute2 = new SymbolAttribute(symbolAttribute1);
                     symbolAttribute2.name = s1;
                     symbolAttribute2.varAttr.off = off;
@@ -313,6 +330,7 @@ public class SymbolTable {
             currentOffset += typeDetails.size;
 
         } else if (t.memberKind == AllName.memberKind.IdK) {
+            //先确定标识符是否存在
             SymbolAttribute symbolAttribute1 = symbolTable.get(t.name.get(0));
             if (symbolAttribute1 == null || symbolAttribute1.kind != typeKind) {
                 error = new MyError();
@@ -333,7 +351,18 @@ public class SymbolTable {
         }
 
         currentOffset -= symbolAttribute.typePtr.size;
-        for (String s1 : t.name) {
+        int i = 0;
+        if (t.memberKind == AllName.memberKind.IdK) {
+            i = 1;
+        }
+        for (; i < t.name.size(); i++) {
+            String s1 = t.name.get(i);
+            if (symbolTable.containsKey(s1)) {
+                error = new MyError();
+                error.line = t.lineno;
+                error.errorType = 0;
+                return;
+            }
             SymbolAttribute symbolAttribute1 = new SymbolAttribute(symbolAttribute);
             symbolAttribute1.name = s1;
             symbolAttribute1.varAttr.off = currentOffset;
@@ -393,6 +422,7 @@ public class SymbolTable {
         currentOffset = swap;
         currentLeve--;
     }
+
 
     void traverseAll(TreeNode t) {
         if (error != null) {

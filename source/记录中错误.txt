@@ -1,0 +1,27 @@
+program p
+type
+    typeRec = record
+    integer cc;
+    array [1..20]of integer xx,cc1;
+    end;
+
+var
+    typeRec test1;
+    typeRec test2,test1;
+
+procedure q(integer i);
+var integer a;
+
+begin
+    a:=i;
+    write(a)
+end
+
+begin
+read(vl);
+if v1<10
+then v1:=v1+10
+else v1:=v1-10
+fi;
+q(v1)
+end.
