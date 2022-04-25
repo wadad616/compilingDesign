@@ -5,9 +5,7 @@ type
     integer tr1;
     char c1;
     end;
-
 var
-
     char ccc1;
     t1 test1;
     record
@@ -27,7 +25,7 @@ end
 begin
 read(test1);
 if v1<10
-then v1:=v1+10
+then v1:=ccc1+ccc1
 else v1:=v1-10
 fi;
 q(v1)

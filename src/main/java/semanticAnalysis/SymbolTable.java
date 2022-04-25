@@ -418,9 +418,14 @@ public class SymbolTable {
             }
             if (t.nodeKind == AllName.NodeKind.DecK) {
                 traverseVarK(t);
-
-                SymbolAttribute symbolAttribute = getSymbolAttribute(t.name.get(0));
-                proc.procAttr.param.add(symbolAttribute.typePtr.kind);
+                int i=0;
+                if(t.memberKind== AllName.memberKind.IdK){
+                    i=1;
+                }
+                for(;i<t.name.size();i++){
+                    SymbolAttribute symbolAttribute = getSymbolAttribute(t.name.get(i));
+                    proc.procAttr.param.add(symbolAttribute.typePtr.kind);
+                }
             } else {
                 another = t;
                 break;
@@ -552,10 +557,20 @@ public class SymbolTable {
             return;
         }
         TreeNode treeNode = t.child.get(0);
+        String s = treeNode.name.get(0);
+        SymbolAttribute symbolAttribute = getSymbolAttribute(s);
+        if(symbolAttribute.kind!=varKind){
+            error = new MyError();
+            error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
+            error.errorType = 20;
+            error.line = t.lineno;
+            return;
+        }
         AllName.Types types = processExp(treeNode);
         if (error != null) {
             return;
         }
+
         TreeNode treeNode1 = t.child.get(1);
         AllName.Types types1 = processExp(treeNode1);
         if (error != null) {
@@ -627,7 +642,7 @@ public class SymbolTable {
             return;
         }
         for (int i = 1; i < t.child.size(); i++) {
-            TreeNode treeNode1 = t.child.get(0);
+            TreeNode treeNode1 = t.child.get(i);
             SymbolAttribute symbolAttribute1 = getSymbolAttribute(treeNode1.name.get(0));
             if (symbolAttribute1 == null) {
                 error = new MyError();
@@ -676,7 +691,17 @@ public class SymbolTable {
                 }
 
                 if (types == types1) {
-                    return boolTy;
+                    if (t.attr.expAttr.op == AllName.LexType.EQ || t.attr.expAttr.op == AllName.LexType.LT) {
+                        return boolTy;
+                    }
+                    if (types == charTy) {
+                        error = new MyError();
+                        error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
+                        error.errorType = 19;
+                        error.line = t.lineno;
+                        return TypesDefault;
+                    }
+                    return types;
                 } else {
                     error = new MyError();
                     error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
