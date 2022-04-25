@@ -231,12 +231,37 @@ public class SymbolTable {
                     symbolAttribute1.name = t1.name.get(0);
                     symbolAttribute1.typePtr = intPtr;
                     symbolAttribute1.varAttr.off = off;
+                    off++;
                 } else if (t1.memberKind == AllName.memberKind.CharK) {
                     symbolAttribute1.name = t1.name.get(0);
                     symbolAttribute1.typePtr = charPtr;
                     symbolAttribute1.varAttr.off = off;
+                    off++;
+                } else if (t1.memberKind == AllName.memberKind.ArrayK) {
+                    symbolAttribute1.name = t1.name.get(0);
+                    TypeDetails typeDetails1 = new TypeDetails("array");
+                    symbolAttribute1.typePtr = typeDetails1;
+                    symbolAttribute1.varAttr.off = off;
+
+                    TreeNode.ArrayAttr arrayAttr = t1.attr.arrayAttr;
+                    if (arrayAttr.low > arrayAttr.up) {
+                        MyError error = new MyError();
+                        error.line = t.lineno;
+                        error.errorType = 2;
+                        return;
+                    }
+                    if (arrayAttr.childType == AllName.memberKind.IntegerK) {
+                        typeDetails1.arrayAttr.elemTy = intTy;
+                    } else {
+                        typeDetails1.arrayAttr.elemTy = charTy;
+                    }
+                    typeDetails1.kind = arrayTy;
+                    typeDetails1.arrayAttr.low = arrayAttr.low;
+                    typeDetails1.arrayAttr.top = arrayAttr.up;
+                    typeDetails1.size = arrayAttr.up - arrayAttr.low + 1;
+                    off+=typeDetails1.size;
                 }
-                off++;
+
             }
             symbolAttribute.typePtr = typeDetails;
 
