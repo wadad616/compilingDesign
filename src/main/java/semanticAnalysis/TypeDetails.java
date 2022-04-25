@@ -4,6 +4,7 @@ import Utils.AllName;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Objects;
 
 @Data
 public class TypeDetails {
@@ -12,7 +13,6 @@ public class TypeDetails {
     AllName.Types kind;
     List<SymbolAttribute> body;
     ArrayAttr arrayAttr;
-
 
     public TypeDetails() {
     }
@@ -28,6 +28,19 @@ public class TypeDetails {
         AllName.Types elemTy;
         int low;
         int top;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ArrayAttr arrayAttr = (ArrayAttr) o;
+            return low == arrayAttr.low && top == arrayAttr.top && elemTy == arrayAttr.elemTy;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(elemTy, low, top);
+        }
     }
 
 
@@ -50,4 +63,31 @@ public class TypeDetails {
         boolPtr.kind = AllName.Types.boolTy;
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TypeDetails that = (TypeDetails) o;
+        if (this.body.size() != that.body.size()) {
+            return false;
+        } else {
+            for (int i = 0; i < body.size(); i++) {
+                SymbolAttribute s1 = body.get(i);
+                SymbolAttribute s2 = that.body.get(i);
+                if (!s1.name.equals(s2.name)) {
+                    return false;
+                }
+                if (!s1.typePtr.equals(s2.typePtr)) {
+                    return false;
+                }
+            }
+        }
+        return size == that.size && kind == that.kind && Objects.equals(arrayAttr, that.arrayAttr);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(size, kind, body, arrayAttr);
+    }
 }
