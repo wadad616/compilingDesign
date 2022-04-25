@@ -64,6 +64,7 @@ public class SymbolTable {
     }
 
     void traverse(TreeNode t) {
+
         if (error != null) {
             return;
         }
@@ -84,6 +85,8 @@ public class SymbolTable {
                 }
             }
         }
+
+
     }
 
     void traverseTypeK(TreeNode t) {
@@ -322,8 +325,6 @@ public class SymbolTable {
             }
             typeDetails.size = off;
             symbolAttribute.typePtr = typeDetails;
-
-
             symbolAttribute.varAttr.level = currentLeve;
             symbolAttribute.varAttr.off = currentOffset;
             symbolAttribute.varAttr.access = false;
@@ -405,6 +406,7 @@ public class SymbolTable {
             }
             if (t.nodeKind == AllName.NodeKind.DecK) {
                 traverseVarK(t);
+
                 SymbolAttribute symbolAttribute = getSymbolAttribute(t.name.get(0));
                 proc.procAttr.param.add(symbolAttribute.typePtr.kind);
             } else {

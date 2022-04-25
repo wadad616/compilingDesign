@@ -1,15 +1,9 @@
 program p
-type
-    typeRec = record
-    integer cc;
-    integer cc;
-    end;
-
 var
-    typeRec test1;
-    typeRec test1;
+    integer test1;
 
-procedure q(integer i);
+
+procedure q(array [1..20]of integer xx;integer i,j;integer k,i);
 var integer a;
 
 begin

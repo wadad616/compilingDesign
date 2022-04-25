@@ -2,12 +2,12 @@ program p
 type
     typeRec = record
     integer cc;
-    integer cc;
+    array [1..20]of integer xx,cc1;
     end;
 
 var
     typeRec test1;
-    typeRec test1;
+    typeRec test2,test1;
 
 procedure q(integer i);
 var integer a;

@@ -27,6 +27,7 @@ public class testTable {
         }
         System.out.println(symbolTable.error);
     }
+
     @Test
     public void mainTest1() {
         Lex lex = new Lex("source/source1.txt");
@@ -44,6 +45,7 @@ public class testTable {
         }
         System.out.println(symbolTable.error);
     }
+
     @Test
     public void mainTest2() {
         Lex lex = new Lex("source/source2.txt");
@@ -61,6 +63,7 @@ public class testTable {
         }
         System.out.println(symbolTable.error);
     }
+
     @Test
     public void 数组上下界错误() {
         Lex lex = new Lex("source/数组上下界错误.txt");
@@ -78,6 +81,7 @@ public class testTable {
         }
         System.out.println(symbolTable.error);
     }
+
     @Test
     public void 记录中错误() {
         Lex lex = new Lex("source/记录中错误.txt");
@@ -95,4 +99,42 @@ public class testTable {
         }
         System.out.println(symbolTable.error);
     }
+
+    @Test
+    public void 变量重复错误() {
+        Lex lex = new Lex("source/变量重复错误.txt");
+        lex.LexProcess();
+        List<LexToken> tokenList = lex.tokenList;
+        DescentMethod descentMethod = new DescentMethod(tokenList);
+        TreeNode program = descentMethod.program();
+        SymbolTable symbolTable = new SymbolTable(program);
+        List<Map<String, SymbolAttribute>> symbolTables = symbolTable.getSymbolTables();
+        for (Map<String, SymbolAttribute> map : symbolTables) {
+            System.out.println("===================================");
+            for (Map.Entry<String, SymbolAttribute> e : map.entrySet()) {
+                System.out.println(e);
+            }
+        }
+        System.out.println(symbolTable.error);
+    }
+
+    @Test
+    public void 函数测试() {
+        Lex lex = new Lex("source/函数测试.txt");
+        lex.LexProcess();
+        List<LexToken> tokenList = lex.tokenList;
+        DescentMethod descentMethod = new DescentMethod(tokenList);
+        TreeNode program = descentMethod.program();
+        SymbolTable symbolTable = new SymbolTable(program);
+        List<Map<String, SymbolAttribute>> symbolTables = symbolTable.getSymbolTables();
+        for (Map<String, SymbolAttribute> map : symbolTables) {
+            System.out.println("===================================");
+            for (Map.Entry<String, SymbolAttribute> e : map.entrySet()) {
+                System.out.println(e);
+            }
+        }
+        System.out.println(symbolTable.error);
+    }
+
+
 }
