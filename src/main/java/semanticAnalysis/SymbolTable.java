@@ -341,7 +341,7 @@ public class SymbolTable {
 
         } else if (t.memberKind == AllName.memberKind.IdK) {
             //先确定标识符是否存在
-            SymbolAttribute symbolAttribute1 = symbolTable.get(t.name.get(0));
+            SymbolAttribute symbolAttribute1 = getSymbolAttribute(t.name.get(0));
             if (symbolAttribute1 == null || symbolAttribute1.kind != typeKind) {
                 error = new MyError();
                 error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
@@ -418,11 +418,11 @@ public class SymbolTable {
             }
             if (t.nodeKind == AllName.NodeKind.DecK) {
                 traverseVarK(t);
-                int i=0;
-                if(t.memberKind== AllName.memberKind.IdK){
-                    i=1;
+                int i = 0;
+                if (t.memberKind == AllName.memberKind.IdK) {
+                    i = 1;
                 }
-                for(;i<t.name.size();i++){
+                for (; i < t.name.size(); i++) {
                     SymbolAttribute symbolAttribute = getSymbolAttribute(t.name.get(i));
                     proc.procAttr.param.add(symbolAttribute.typePtr.kind);
                 }
@@ -559,7 +559,7 @@ public class SymbolTable {
         TreeNode treeNode = t.child.get(0);
         String s = treeNode.name.get(0);
         SymbolAttribute symbolAttribute = getSymbolAttribute(s);
-        if(symbolAttribute.kind!=varKind){
+        if (symbolAttribute.kind != varKind) {
             error = new MyError();
             error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
             error.errorType = 20;

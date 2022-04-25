@@ -14,7 +14,7 @@ var
     integer v1,v2;
     array [1..20]of integer xx;
 
-procedure q(integer i,j,k);
+procedure q(t1 i,j,k);
 var integer a;
 
 begin
