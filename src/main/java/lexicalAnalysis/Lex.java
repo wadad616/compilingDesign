@@ -187,7 +187,7 @@ public class Lex {
             tokenList.add(new LexToken(ioUtils.nowLine, AllName.divideWord.get("."), "."));
             ioUtils.getPreChar();
         } else {
-            tokenList.add(new LexToken(ioUtils.nowLine, AllName.LexType.ERROR, "."));
+            tokenList.add(new LexToken(ioUtils.nowLine, AllName.divideWord.get("."), "."));
             ioUtils.getPreChar();
         }
         outState();

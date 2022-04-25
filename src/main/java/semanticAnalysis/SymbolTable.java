@@ -342,6 +342,7 @@ public class SymbolTable {
         } else if (t.memberKind == AllName.memberKind.IdK) {
             //先确定标识符是否存在
             SymbolAttribute symbolAttribute1 = getSymbolAttribute(t.name.get(0));
+            //注意这个地方肯定是正确的，下次看到的时候不需要怀疑
             if (symbolAttribute1 == null || symbolAttribute1.kind != typeKind) {
                 error = new MyError();
                 error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
@@ -424,7 +425,7 @@ public class SymbolTable {
                 }
                 for (; i < t.name.size(); i++) {
                     SymbolAttribute symbolAttribute = getSymbolAttribute(t.name.get(i));
-                    proc.procAttr.param.add(symbolAttribute.typePtr.kind);
+                    proc.procAttr.param.add(symbolAttribute.typePtr);
                 }
             } else {
                 another = t;
@@ -633,7 +634,7 @@ public class SymbolTable {
             error.line = treeNode.lineno;
             return;
         }
-        List<AllName.Types> param = symbolAttribute.procAttr.param;
+        List<TypeDetails> param = symbolAttribute.procAttr.param;
         if (param.size() != t.child.size() - 1) {
             error = new MyError();
             error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
@@ -644,14 +645,14 @@ public class SymbolTable {
         for (int i = 1; i < t.child.size(); i++) {
             TreeNode treeNode1 = t.child.get(i);
             SymbolAttribute symbolAttribute1 = getSymbolAttribute(treeNode1.name.get(0));
-            if (symbolAttribute1 == null) {
+            if (symbolAttribute1 == null || symbolAttribute1.kind == typeKind) {
                 error = new MyError();
                 error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                 error.errorType = 17;
                 error.line = treeNode1.lineno;
                 return;
             }
-            if (symbolAttribute1.typePtr.kind != param.get(i - 1)) {
+            if (!symbolAttribute1.typePtr.equals(param.get(i - 1))) {
                 error = new MyError();
                 error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                 error.errorType = 18;
@@ -761,7 +762,8 @@ public class SymbolTable {
                             return TypesDefault;
                         }
                     }
-                    if (t.attr.arrayAttr.childType == AllName.memberKind.IntegerK) {
+
+                    if (symbolAttribute.typePtr.arrayAttr.elemTy == intTy) {
                         return intTy;
                     } else {
                         return charTy;
@@ -799,11 +801,11 @@ public class SymbolTable {
                         return symbolAttribute.typePtr.kind;
                     } else {
                         //确保是数组
-                        if (symbolAttribute.typePtr.kind != arrayTy) {
+                        if (cur.typePtr.kind != arrayTy) {
                             error = new MyError();
                             error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                             error.line = t1.getLineno();
-                            error.errorType = 8;
+                            error.errorType = 7;
                             return TypesDefault;
                         }
 
@@ -821,7 +823,7 @@ public class SymbolTable {
                         }
                         if (tNow.memberKind == AllName.memberKind.ConstK) {
                             int val = tNow.attr.expAttr.val;
-                            if (val > symbolAttribute.typePtr.arrayAttr.top || val < symbolAttribute.typePtr.arrayAttr.low) {
+                            if (val > cur.typePtr.arrayAttr.top || val < cur.typePtr.arrayAttr.low) {
                                 error = new MyError();
                                 error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                                 error.line = tNow.getLineno();
@@ -829,7 +831,7 @@ public class SymbolTable {
                                 return TypesDefault;
                             }
                         }
-                        if (t1.attr.arrayAttr.childType == AllName.memberKind.IntegerK) {
+                        if (cur.typePtr.arrayAttr.elemTy == intTy) {
                             return intTy;
                         } else {
                             return charTy;

@@ -5,7 +5,13 @@ type
     typeRec=record
     integer tr1;
     char c1;
+    array [1..20]of integer xx2;
     end;
+    typeRec1=record
+        integer tr1;
+        char c1;
+        array [1..20]of integer xx1;
+        end;
 
     t2=array [1..20]of integer;
 
@@ -18,7 +24,7 @@ var
     end varRec;
     integer v1,v2;
 
-procedure q(t1 i,j,l;typeRec xx);
+procedure q(t1 i,j,l;typeRec1 xx);
 var integer a;
 
 begin
@@ -32,5 +38,5 @@ if v1<10
 then v1:=v1+10
 else v1:=v1-10
 fi;
-q(v1,v1,v1)
+q(v1,v1,v1,test2)
 end.

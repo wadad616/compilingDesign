@@ -69,20 +69,27 @@ public class TypeDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TypeDetails that = (TypeDetails) o;
-        if (this.body.size() != that.body.size()) {
-            return false;
-        } else {
-            for (int i = 0; i < body.size(); i++) {
-                SymbolAttribute s1 = body.get(i);
-                SymbolAttribute s2 = that.body.get(i);
-                if (!s1.name.equals(s2.name)) {
-                    return false;
-                }
-                if (!s1.typePtr.equals(s2.typePtr)) {
-                    return false;
+        if (this.body != null && that.body != null) {
+            if (this.body.size() != that.body.size()) {
+                return false;
+            } else {
+                for (int i = 0; i < body.size(); i++) {
+                    SymbolAttribute s1 = body.get(i);
+                    SymbolAttribute s2 = that.body.get(i);
+                    if (!s1.name.equals(s2.name)) {
+                        return false;
+                    }
+                    if (!s1.typePtr.equals(s2.typePtr)) {
+                        return false;
+                    }
                 }
             }
+        } else if (this.body == null && that.body == null) {
+
+        }else{
+            return false;
         }
+
         return size == that.size && kind == that.kind && Objects.equals(arrayAttr, that.arrayAttr);
     }
 

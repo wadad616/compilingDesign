@@ -178,9 +178,10 @@ public class testTable {
         symbolTable.traverseAll(program);
         System.out.println(symbolTable.error);
     }
+
     @Test
     public void 过程参数类型未匹配() {
-        Lex lex = new Lex("source/testAll/source.txt");
+        Lex lex = new Lex("source/testAll/过程参数类型未匹配.txt");
         lex.LexProcess();
         List<LexToken> tokenList = lex.tokenList;
         DescentMethod descentMethod = new DescentMethod(tokenList);
@@ -201,7 +202,7 @@ public class testTable {
     }
     @Test
     public void 过程调用参数未定义() {
-        Lex lex = new Lex("source/testAll/source.txt");
+        Lex lex = new Lex("source/testAll/过程调用参数未定义.txt");
         lex.LexProcess();
         List<LexToken> tokenList = lex.tokenList;
         DescentMethod descentMethod = new DescentMethod(tokenList);
@@ -218,7 +219,6 @@ public class testTable {
 
         symbolTable.traverseAll(program);
         System.out.println(symbolTable.error);
-
     }
 
     @Test
@@ -244,7 +244,7 @@ public class testTable {
     }
     @Test
     public void 非过程调用() {
-        Lex lex = new Lex("source/testAll/source.txt");
+        Lex lex = new Lex("source/testAll/非过程调用.txt");
         lex.LexProcess();
         List<LexToken> tokenList = lex.tokenList;
         DescentMethod descentMethod = new DescentMethod(tokenList);
@@ -265,7 +265,7 @@ public class testTable {
     }
     @Test
     public void 写语句表达式类型错误() {
-        Lex lex = new Lex("source/testAll/source.txt");
+        Lex lex = new Lex("source/testAll/写语句表达式类型错误.txt");
         lex.LexProcess();
         List<LexToken> tokenList = lex.tokenList;
         DescentMethod descentMethod = new DescentMethod(tokenList);

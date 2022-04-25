@@ -1657,6 +1657,7 @@ public class DescentMethod {
             if (t.attr == null) {
                 t.setAttr("exp");
             }
+
             t.attr.expAttr.varKind = AllName.LexType.ArrayMembV;
             TreeNode treeNode = exp(null);
             //错误处理
@@ -1668,6 +1669,8 @@ public class DescentMethod {
             if (!match("RMIDPAREN")) {
                 //错误处理
             }
+            next();
+            return;
         } else if (match("DOT")) {
             next();
             if (t.attr == null) {
@@ -1681,6 +1684,7 @@ public class DescentMethod {
             //注意数组Id表达式的第一儿子就是下标
             t.child.add(treeNode);
             treeNode.father = t;
+            return;
         }
         //错误处理
         System.out.println("错误");

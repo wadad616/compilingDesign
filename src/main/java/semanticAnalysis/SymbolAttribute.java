@@ -43,7 +43,7 @@ public class SymbolAttribute {
     @Data
     public class ProcAttr {
         int level;
-        List<AllName.Types> param;
+        List<TypeDetails> param;
         int code;
         int size;
     }

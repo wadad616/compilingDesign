@@ -1,24 +1,22 @@
 program p
 type
     t1 = integer;
-
     typeRec=record
     integer tr1;
     char c1;
+    array [1..20]of integer xx;
     end;
-
-    t2=array [1..20]of integer;
 
 var
     char ccc1;
-    t1 test1;
-    typeRec test2;
+    typeRec test1;
     record
     integer vr1;
     end varRec;
+
     integer v1,v2;
 
-procedure q(t1 i,j,l;typeRec xx);
+procedure q(integer i);
 var integer a;
 
 begin
@@ -27,10 +25,11 @@ begin
 end
 
 begin
-read(test1);
+write(ccc1=ccc1)
+read(ccc1);
 if v1<10
 then v1:=v1+10
 else v1:=v1-10
 fi;
-q(v1,v1,v1)
+q(t1)
 end.
