@@ -9,7 +9,6 @@ public class TestVisual {
     String name;
     String title;
     List<TestVisual> children;
-
     public TestVisual(String name, String title, List<TestVisual> children) {
         this.name = name;
         this.title = title;

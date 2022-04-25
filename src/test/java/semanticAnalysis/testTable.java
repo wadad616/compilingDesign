@@ -1,15 +1,15 @@
-package grammer;
+package semanticAnalysis;
 
+import grammer.DescentMethod;
+import grammer.TreeNode;
 import lexicalAnalysis.Lex;
 import lexicalAnalysis.LexToken;
 import org.junit.Test;
-import semanticAnalysis.SymbolAttribute;
-import semanticAnalysis.SymbolTable;
 
 import java.util.List;
 import java.util.Map;
 
-public class testDescentMethod {
+public class testTable {
     @Test
     public void mainTest() {
         Lex lex = new Lex("source.txt");

@@ -27,17 +27,14 @@ public class AllName {
         Void, Integer, Boolean,
 
         //标识条件表达式的处理
-        NotBool,YES,NO,
-
-
-
+        NotBool, YES, NO,
     }
 
     //语法树的节点类型    待补充
     public static enum NodeKind {
         //默认值
         NodeKindDefault,
-        ProK, PheadK, TypeK, VarK, ProcDecK, StmLK, DecK, StmtK, ExpK, TotalDecK,ParamDeck,
+        ProK, PheadK, TypeK, VarK, ProcDecK, StmLK, DecK, StmtK, ExpK, TotalDecK, ParamDeck,
         //特殊节点，用于特殊的处理
         Special,
     }
@@ -53,10 +50,18 @@ public class AllName {
         //stmt类型
         IfK, WhileK, AssignK, ReadK, WriteK, CallK, ReturnK,
         //特殊stmt类型 这些stmtK 后可以接上多个普通的stmt类型，就和StmLK差不多了
-        ThenK,ElseK,DoK,
+        ThenK, ElseK, DoK,
         //exp类型
         // CIdK既可以dec类型，也可以为exp类型 或者将IdK看作式变量也可以
         OpK, ConstK,
+
+    }
+
+    public static enum Types {
+        //标识符类别
+        typeKind,varKind,procKind,
+        //具体类型
+        intTy, charTy , arrayTy, recordTy, boolTy,TypesDefault,
 
     }
 

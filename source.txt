@@ -1,8 +1,10 @@
 program p
-type tl = integer;
+type t1 = integer;
 var integer v1,v2;
+    array [1..20]of integer xx;
 procedure q(integer i);
 var integer a;
+
 begin
     a:=i;
     write(a)
