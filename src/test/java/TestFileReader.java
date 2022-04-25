@@ -227,5 +227,9 @@ public class TestFileReader {
             System.out.println("case "+i+": process"+i+"();break;");
         }
     }
+    @Test
+    public void testLine(){
+        System.out.println(Thread.currentThread().getStackTrace()[1].getLineNumber());
+    }
 
 }

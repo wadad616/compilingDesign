@@ -7,7 +7,7 @@ import lombok.Data;
 public class MyError {
     public int line;
     public int errorType;
-
+    public int errorLine;
     String getErrorDescription() {
         return switch (errorType) {
             case -1 -> "未知错误";

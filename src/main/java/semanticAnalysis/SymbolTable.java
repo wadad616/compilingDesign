@@ -99,6 +99,7 @@ public class SymbolTable {
         //判断是否有重复定义
         if (symbolTable.containsKey(s)) {
             error = new MyError();
+            error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
             error.line = t.lineno;
             error.errorType = 0;
             return;
@@ -124,6 +125,7 @@ public class SymbolTable {
             }
             if (arrayAttr.low > arrayAttr.up) {
                 error = new MyError();
+                error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                 error.line = t.lineno;
                 error.errorType = 2;
                 return;
@@ -143,6 +145,7 @@ public class SymbolTable {
             for (TreeNode t1 : t.child) {
                 if (jud.contains(t1.name.get(0))) {
                     error = new MyError();
+                    error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                     error.errorType = 3;
                     error.line = t1.getLineno();
                     return;
@@ -168,6 +171,7 @@ public class SymbolTable {
                     TreeNode.ArrayAttr arrayAttr = t1.attr.arrayAttr;
                     if (arrayAttr.low > arrayAttr.up) {
                         error = new MyError();
+                        error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                         error.line = t.lineno;
                         error.errorType = 2;
                         return;
@@ -188,6 +192,7 @@ public class SymbolTable {
                 for (String s1 : t1.name) {
                     if (jud.contains(s1)) {
                         error = new MyError();
+                        error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                         error.errorType = 3;
                         error.line = t1.getLineno();
                         return;
@@ -219,6 +224,7 @@ public class SymbolTable {
         //判断是否有重复定义
         if (symbolTable.containsKey(s)) {
             error = new MyError();
+            error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
             error.line = t.lineno;
             error.errorType = 0;
             return;
@@ -266,6 +272,7 @@ public class SymbolTable {
             for (TreeNode t1 : t.child) {
                 if (jud.contains(t1.name.get(0))) {
                     error = new MyError();
+                    error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                     error.errorType = 3;
                     error.line = t1.getLineno();
                     return;
@@ -291,6 +298,7 @@ public class SymbolTable {
                     TreeNode.ArrayAttr arrayAttr = t1.attr.arrayAttr;
                     if (arrayAttr.low > arrayAttr.up) {
                         error = new MyError();
+                        error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                         error.line = t.lineno;
                         error.errorType = 2;
                         return;
@@ -311,6 +319,7 @@ public class SymbolTable {
                 for (String s1 : t1.name) {
                     if (jud.contains(s1)) {
                         error = new MyError();
+                        error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                         error.errorType = 3;
                         error.line = t1.getLineno();
                         return;
@@ -335,6 +344,7 @@ public class SymbolTable {
             SymbolAttribute symbolAttribute1 = symbolTable.get(t.name.get(0));
             if (symbolAttribute1 == null || symbolAttribute1.kind != typeKind) {
                 error = new MyError();
+                error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                 error.line = t.lineno;
                 error.errorType = 1;
                 return;
@@ -360,6 +370,7 @@ public class SymbolTable {
             String s1 = t.name.get(i);
             if (symbolTable.containsKey(s1)) {
                 error = new MyError();
+                error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                 error.line = t.lineno;
                 error.errorType = 0;
                 return;
@@ -384,6 +395,7 @@ public class SymbolTable {
         String s = t1.name.get(0);
         if (symbolTable.containsKey(s)) {
             error = new MyError();
+            error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
             error.line = t1.lineno;
             error.errorType = 0;
             return;
@@ -426,7 +438,7 @@ public class SymbolTable {
     }
 
 
-    void traverseAll(TreeNode t) {
+    public void traverseAll(TreeNode t) {
         if (error != null) {
             return;
         }
@@ -493,6 +505,7 @@ public class SymbolTable {
         AllName.Types types = processExp(treeNode);
         if (types != boolTy) {
             error = new MyError();
+            error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
             error.errorType = 11;
             error.line = t.lineno;
             return;
@@ -520,6 +533,7 @@ public class SymbolTable {
         AllName.Types types = processExp(treeNode);
         if (types != boolTy) {
             error = new MyError();
+            error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
             error.errorType = 11;
             error.line = t.lineno;
             return;
@@ -549,6 +563,7 @@ public class SymbolTable {
         }
         if (types != types1) {
             error = new MyError();
+            error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
             error.errorType = 12;
             error.line = t.lineno;
         }
@@ -558,12 +573,14 @@ public class SymbolTable {
         SymbolAttribute symbolAttribute = getSymbolAttribute(t.name.get(0));
         if (symbolAttribute == null) {
             error = new MyError();
+            error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
             error.errorType = 1;
             error.line = t.lineno;
             return;
         }
-        if (symbolAttribute.kind != typeKind) {
+        if (symbolAttribute.kind == typeKind) {
             error = new MyError();
+            error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
             error.errorType = 13;
             error.line = t.lineno;
         }
@@ -577,6 +594,7 @@ public class SymbolTable {
         }
         if (types == boolTy) {
             error = new MyError();
+            error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
             error.errorType = 14;
             error.line = treeNode.lineno;
         }
@@ -588,12 +606,14 @@ public class SymbolTable {
         SymbolAttribute symbolAttribute = getSymbolAttribute(treeNode.name.get(0));
         if (symbolAttribute == null) {
             error = new MyError();
+            error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
             error.errorType = 1;
             error.line = treeNode.lineno;
             return;
         }
         if (symbolAttribute.kind != procKind) {
             error = new MyError();
+            error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
             error.errorType = 15;
             error.line = treeNode.lineno;
             return;
@@ -601,6 +621,7 @@ public class SymbolTable {
         List<AllName.Types> param = symbolAttribute.procAttr.param;
         if (param.size() != t.child.size() - 1) {
             error = new MyError();
+            error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
             error.errorType = 16;
             error.line = treeNode.lineno;
             return;
@@ -610,12 +631,14 @@ public class SymbolTable {
             SymbolAttribute symbolAttribute1 = getSymbolAttribute(treeNode1.name.get(0));
             if (symbolAttribute1 == null) {
                 error = new MyError();
+                error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                 error.errorType = 17;
                 error.line = treeNode1.lineno;
                 return;
             }
             if (symbolAttribute1.typePtr.kind != param.get(i - 1)) {
                 error = new MyError();
+                error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                 error.errorType = 18;
                 error.line = treeNode1.lineno;
                 return;
@@ -656,6 +679,7 @@ public class SymbolTable {
                     return boolTy;
                 } else {
                     error = new MyError();
+                    error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                     error.errorType = 4;
                     error.line = t.lineno;
                     return TypesDefault;
@@ -666,7 +690,6 @@ public class SymbolTable {
                 SymbolAttribute symbolAttribute = getSymbolAttribute(t.name.get(0));
                 //首先确保这是存在的
                 if (symbolAttribute == null) {
-                    error = new MyError();
                     error.line = t.getLineno();
                     error.errorType = 1;
                     return TypesDefault;
@@ -674,6 +697,7 @@ public class SymbolTable {
                 //再确保这是一个变量
                 if (symbolAttribute.kind == typeKind) {
                     error = new MyError();
+                    error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                     error.line = t.getLineno();
                     error.errorType = 5;
                     return TypesDefault;
@@ -684,6 +708,7 @@ public class SymbolTable {
                     //这里先要确保这是一个数组
                     if (symbolAttribute.typePtr.kind != arrayTy) {
                         error = new MyError();
+                        error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                         error.line = t.getLineno();
                         error.errorType = 7;
                         return TypesDefault;
@@ -696,6 +721,7 @@ public class SymbolTable {
                     }
                     if (types != intTy) {
                         error = new MyError();
+                        error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                         error.line = tNow.getLineno();
                         error.errorType = 6;
                         return TypesDefault;
@@ -704,6 +730,7 @@ public class SymbolTable {
                         int val = tNow.attr.expAttr.val;
                         if (val > symbolAttribute.typePtr.arrayAttr.top || val < symbolAttribute.typePtr.arrayAttr.low) {
                             error = new MyError();
+                            error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                             error.line = tNow.getLineno();
                             error.errorType = 9;
                             return TypesDefault;
@@ -719,6 +746,7 @@ public class SymbolTable {
                     //首先确保这是一个记录
                     if (symbolAttribute.typePtr.kind != recordTy) {
                         error = new MyError();
+                        error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                         error.line = t.getLineno();
                         error.errorType = 8;
                         return TypesDefault;
@@ -736,6 +764,7 @@ public class SymbolTable {
                     }
                     if (cur == null) {
                         error = new MyError();
+                        error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                         error.line = t1.getLineno();
                         error.errorType = 10;
                         return TypesDefault;
@@ -747,6 +776,7 @@ public class SymbolTable {
                         //确保是数组
                         if (symbolAttribute.typePtr.kind != arrayTy) {
                             error = new MyError();
+                            error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                             error.line = t1.getLineno();
                             error.errorType = 8;
                             return TypesDefault;
@@ -759,6 +789,7 @@ public class SymbolTable {
                         }
                         if (types != intTy) {
                             error = new MyError();
+                            error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                             error.line = tNow.getLineno();
                             error.errorType = 6;
                             return TypesDefault;
@@ -767,6 +798,7 @@ public class SymbolTable {
                             int val = tNow.attr.expAttr.val;
                             if (val > symbolAttribute.typePtr.arrayAttr.top || val < symbolAttribute.typePtr.arrayAttr.low) {
                                 error = new MyError();
+                                error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                                 error.line = tNow.getLineno();
                                 error.errorType = 9;
                                 return TypesDefault;
@@ -794,6 +826,7 @@ public class SymbolTable {
             }
             default -> {
                 error = new MyError();
+                error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                 error.line = t.lineno;
                 error.errorType = -1;
                 return TypesDefault;
