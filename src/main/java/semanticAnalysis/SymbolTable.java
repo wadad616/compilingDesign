@@ -180,7 +180,15 @@ public class SymbolTable {
                     typeDetails1.size = arrayAttr.up - arrayAttr.low + 1;
                     off += typeDetails1.size;
                 }
-                typeDetails.body.add(symbolAttribute1);
+                off -= symbolAttribute1.typePtr.size;
+                //逗号引起的惨案
+                for (String s1 : t1.name) {
+                    SymbolAttribute symbolAttribute2 = new SymbolAttribute(symbolAttribute1);
+                    symbolAttribute2.name = s1;
+                    symbolAttribute2.varAttr.off = off;
+                    off += symbolAttribute2.typePtr.size;
+                    typeDetails.body.add(symbolAttribute2);
+                }
             }
             typeDetails.size = off;
             symbolAttribute.typePtr = typeDetails;
@@ -285,7 +293,15 @@ public class SymbolTable {
                     typeDetails1.size = arrayAttr.up - arrayAttr.low + 1;
                     off += typeDetails1.size;
                 }
-                typeDetails.body.add(symbolAttribute1);
+                off -= symbolAttribute1.typePtr.size;
+                //逗号引起的惨案
+                for (String s1 : t1.name) {
+                    SymbolAttribute symbolAttribute2 = new SymbolAttribute(symbolAttribute1);
+                    symbolAttribute2.name = s1;
+                    symbolAttribute2.varAttr.off = off;
+                    off += symbolAttribute2.typePtr.size;
+                    typeDetails.body.add(symbolAttribute2);
+                }
             }
             typeDetails.size = off;
             symbolAttribute.typePtr = typeDetails;

@@ -368,7 +368,7 @@ public class DescentMethod {
         if (match("ARRAY")) {
             arrayType(t);
             //进行错误处理
-        } else if (match("ARRAY")) {
+        } else if (match("RECORD")) {
             recType(t);
             //进行错误的处理
         }
