@@ -18,16 +18,6 @@ public class testAll {
         DescentMethod descentMethod = new DescentMethod(tokenList);
         TreeNode program = descentMethod.program();
         SymbolTable symbolTable = new SymbolTable(program);
-        List<Map<String, SymbolAttribute>> symbolTables = symbolTable.getSymbolTables();
-        for (Map<String, SymbolAttribute> map : symbolTables) {
-            System.out.println("===================================");
-            for (Map.Entry<String, SymbolAttribute> e : map.entrySet()) {
-                System.out.println(e);
-            }
-        }
-        System.out.println(symbolTable.error);
-
-        symbolTable.traverseAll(program);
         System.out.println(symbolTable.error);
 
     }

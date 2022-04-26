@@ -14,9 +14,9 @@ import static semanticAnalysis.TypeDetails.intPtr;
 //todo 出现大问题，现在是同级别的问题
 //todo 找到解决方法了，但是
 //todo 先写删除法吧。
+
 public class SymbolTable {
     List<Map<String, SymbolAttribute>> symbolTables;
-    int size = 0;
     TreeNode root;
     int currentLeve = 0;
     int currentOffset = 0;
@@ -26,6 +26,7 @@ public class SymbolTable {
     public SymbolTable(TreeNode root) {
         this.root = root;
         symbolTables = new ArrayList<>();
+        symbolTables.add(new HashMap<>());
         traverse(root);
     }
 
@@ -47,24 +48,11 @@ public class SymbolTable {
         return getSymbolAttribute(name, currentLeve);
     }
 
-    void createCurrentTable() {
-        if (size == 0) {
-            symbolTables.add(new HashMap<>());
-            size++;
-            return;
-        }
-        if (currentLeve == size) {
-            symbolTables.add(new HashMap<>());
-            size++;
-        }
-    }
-
     public List<Map<String, SymbolAttribute>> getSymbolTables() {
         return symbolTables;
     }
 
     void traverse(TreeNode t) {
-
         if (error != null) {
             return;
         }
@@ -78,6 +66,8 @@ public class SymbolTable {
             }
         } else if (t.nodeKind == AllName.NodeKind.ProcDecK) {
             traverseProcK(t);
+        } else if (t.nodeKind == AllName.NodeKind.StmLK) {
+            traverseBody(t);
         } else {
             if (t.child != null) {
                 for (TreeNode t1 : t.child) {
@@ -85,12 +75,10 @@ public class SymbolTable {
                 }
             }
         }
-
-
     }
 
+
     void traverseTypeK(TreeNode t) {
-        createCurrentTable();
         String s = t.name.get(0);
         Map<String, SymbolAttribute> symbolTable = getSymbolTable(currentLeve);
         SymbolAttribute symbolAttribute = new SymbolAttribute();
@@ -213,7 +201,6 @@ public class SymbolTable {
 
     //todo 实参与变参
     void traverseVarK(TreeNode t) {
-        createCurrentTable();
         String s = t.name.get(0);
         if (t.memberKind == AllName.memberKind.IdK) {
             s = t.name.get(1);
@@ -391,7 +378,6 @@ public class SymbolTable {
     }
 
     void traverseProcK(TreeNode t1) {
-        createCurrentTable();
         Map<String, SymbolAttribute> symbolTable = getSymbolTable(currentLeve);
         String s = t1.name.get(0);
         if (symbolTable.containsKey(s)) {
@@ -412,7 +398,9 @@ public class SymbolTable {
         currentLeve++;
         int swap = currentOffset;
         currentOffset = 0;
-        TreeNode another = null;
+
+        //添加一个新的map
+        symbolTables.add(new HashMap<>());
         for (TreeNode t : t1.child) {
             if (error != null) {
                 return;
@@ -428,39 +416,16 @@ public class SymbolTable {
                     proc.procAttr.param.add(symbolAttribute.typePtr);
                 }
             } else {
-                another = t;
-                break;
+                traverse(t);
             }
-        }
-
-        //声明部分的处理
-        if (another != null && another.nodeKind == AllName.NodeKind.TotalDecK) {
-            traverse(another);
         }
 
         symbolTable.put(s, proc);
         currentOffset = swap;
+        symbolTable.remove(currentLeve);
         currentLeve--;
     }
 
-
-    public void traverseAll(TreeNode t) {
-        if (error != null) {
-            return;
-        }
-        for (TreeNode t1 : t.child) {
-            switch (t1.nodeKind) {
-                case TotalDecK -> traverseAll(t1);
-                case StmLK -> traverseBody(t1);
-                case ProcDecK -> {
-                    currentLeve++;
-                    traverseAll(t1);
-                    currentLeve--;
-                }
-            }
-        }
-
-    }
 
     //todo 需要注意写个关于层数的函数
     void traverseBody(TreeNode t) {
@@ -495,8 +460,10 @@ public class SymbolTable {
             traverseReturn(t);
         } else {
             //遍历
-            for (TreeNode t1 : t.child) {
-                traverseBody(t1);
+            if (t.child != null) {
+                for (TreeNode t1 : t.child) {
+                    traverseBody(t1);
+                }
             }
         }
     }
@@ -716,7 +683,7 @@ public class SymbolTable {
                 SymbolAttribute symbolAttribute = getSymbolAttribute(t.name.get(0));
                 //首先确保这是存在的
                 if (symbolAttribute == null) {
-                    error=new MyError();
+                    error = new MyError();
                     error.line = t.getLineno();
                     error.errorType = 1;
                     return TypesDefault;

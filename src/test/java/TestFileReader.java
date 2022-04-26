@@ -229,7 +229,10 @@ public class TestFileReader {
     }
     @Test
     public void testLine(){
-        System.out.println(Thread.currentThread().getStackTrace()[1].getLineNumber());
+        ArrayList<String >strings=null;
+        for(String s:strings){
+            System.out.println(s);
+        }
     }
 
 }
