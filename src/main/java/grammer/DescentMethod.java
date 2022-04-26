@@ -1109,7 +1109,7 @@ public class DescentMethod {
         }
         next();
         //为StmtK节点添加儿子节点
-        exp(t);
+        simpleExp(t);
         //错误处理
     }
 
@@ -1277,7 +1277,7 @@ public class DescentMethod {
         }
         next();
 
-        exp(treeNode);
+        simpleExp(treeNode);
         //错误处理
 
         if (!match("RPAREN")) {
@@ -1361,7 +1361,7 @@ public class DescentMethod {
         if (match("RPAREN")) {
             return;
         } else if (match(new String[]{"INTC", "LPAREN", "ID"})) {
-            exp(t);
+            simpleExp(t);
             actParamMore(t);
             //错误处理
         }
@@ -1405,7 +1405,7 @@ public class DescentMethod {
         //1.先默认只有一个expression，先假设一个exp只可以生成一个节点，只不过这个节点为套接的
         //2.这么理解只有赋值才是有多个表达式的
         //3.得到bool表达式的左式
-        TreeNode t1 = simpleExp();
+        TreeNode t1 = simpleExp(null);
         //错误处理
         ret = t1;
 
@@ -1432,7 +1432,7 @@ public class DescentMethod {
             if (!match(new String[]{"INTC", "LPAREN", "ID"})) {
                 //错误处理
             }
-            TreeNode t2 = simpleExp();
+            TreeNode t2 = simpleExp(null);
             //错误处理
 
             treeNode.child.add(t2);
@@ -1458,7 +1458,7 @@ public class DescentMethod {
      * TODO 错误检查 测试
      * @Date 2022/4/18 16:25
      **/
-    TreeNode simpleExp() {
+    TreeNode simpleExp(TreeNode t) {
         TreeNode ret;
         TreeNode left;
         if (!match(new String[]{"INTC", "LPAREN", "ID"})) {
@@ -1499,6 +1499,11 @@ public class DescentMethod {
             t2.father = treeNode;
             ret = treeNode;
             left = treeNode;
+        }
+        if (t != null) {
+            ret.father = t;
+            t.boolChild();
+            t.child.add(ret);
         }
         return ret;
     }
@@ -1570,7 +1575,7 @@ public class DescentMethod {
         TreeNode ret = null;
         if (match("LPAREN")) {
             next();
-            ret = exp(null);
+            ret = simpleExp(null);
             //错误处理
             if (!match("RPAREN")) {
                 //错误处理
@@ -1659,7 +1664,7 @@ public class DescentMethod {
             }
 
             t.attr.expAttr.varKind = AllName.LexType.ArrayMembV;
-            TreeNode treeNode = exp(null);
+            TreeNode treeNode = simpleExp(null);
             //错误处理
 
             t.boolChild();
@@ -1742,7 +1747,7 @@ public class DescentMethod {
                 t.setAttr("exp");
             }
             t.attr.expAttr.varKind = AllName.LexType.ArrayMembV;
-            TreeNode treeNode = exp(null);
+            TreeNode treeNode = simpleExp(null);
             //错误处理
 
             t.boolChild();
@@ -1752,6 +1757,7 @@ public class DescentMethod {
             if (!match("RMIDPAREN")) {
                 //错误处理
             }
+            next();
         }
     }
 

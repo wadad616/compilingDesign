@@ -716,6 +716,7 @@ public class SymbolTable {
                 SymbolAttribute symbolAttribute = getSymbolAttribute(t.name.get(0));
                 //首先确保这是存在的
                 if (symbolAttribute == null) {
+                    error=new MyError();
                     error.line = t.getLineno();
                     error.errorType = 1;
                     return TypesDefault;
@@ -725,7 +726,7 @@ public class SymbolTable {
                     error = new MyError();
                     error.errorLine = Thread.currentThread().getStackTrace()[1].getLineNumber();
                     error.line = t.getLineno();
-                    error.errorType = 5;
+                    error.errorType = 1;
                     return TypesDefault;
                 }
                 if (t.attr.expAttr.varKind == AllName.LexType.idV) {

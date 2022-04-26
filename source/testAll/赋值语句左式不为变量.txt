@@ -13,7 +13,7 @@ var
     record
     integer vr1;
     end varRec;
-
+    array [1..20]of integer xx1;
     integer v1,v2;
 
 procedure q(integer i);
@@ -25,11 +25,13 @@ begin
 end
 
 begin
-read(ccc1);
-write(test1.xx[1]);
+
+write(test1.xx[v1]);
+write(xx1[v1]);
+
 if v1<10
-then v1:=v1+10
+then t1:=v1+10
 else v1:=v1-10
 fi;
-q(t1)
+q()
 end.

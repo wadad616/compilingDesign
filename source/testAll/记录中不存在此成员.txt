@@ -25,11 +25,11 @@ begin
 end
 
 begin
-read(ccc1);
-write(test1.xx[1]);
+
+write(test1.xx1[1]);
 if v1<10
 then v1:=v1+10
 else v1:=v1-10
 fi;
-q(t1)
+q(ccc1)
 end.
